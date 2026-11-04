@@ -1,0 +1,83 @@
+# Словник відповідності імен доменної моделі та коду Python.
+# Використовують dmcd.py (псевдоніми PlantUML) і test_conformance.py.
+classes:
+  Мережа аптек: PharmacyChain
+  Аптека: Pharmacy
+  Фармацевт: Pharmacist
+  Препарат: Drug
+  Рецептурний препарат: PrescriptionDrug
+  Безрецептурний препарат: OtcDrug
+  Партія: Batch
+  Постачальник: Supplier
+  Поставка: Delivery
+  Покупець: Customer
+  Резервування: Reservation
+  Лікар: Doctor
+  Електронний рецепт: EPrescription
+  Продаж: Sale
+  Позиція продажу: SaleLine
+
+attributes:
+  Мережа аптек:
+    назва мережі: name
+    код ЄДРПОУ: edrpou
+  Аптека:
+    номер аптеки: number
+    адреса: address
+    місто: city
+    телефон: phone
+    графік роботи: schedule
+  Фармацевт:
+    табельний номер: personnel_number
+    ПІБ фармацевта: full_name
+  Препарат:
+    торгова назва: trade_name
+    міжнародна непатентована назва: inn
+    форма випуску: dosage_form
+    дозування: dosage
+    виробник: manufacturer
+  Рецептурний препарат:
+    група контролю: control_group
+  Безрецептурний препарат:
+    ліміт на чек: check_limit
+  Партія:
+    серія: series
+    строк придатності: expiry_date
+    закупівельна ціна: purchase_price
+    роздрібна ціна: retail_price
+    кількість у партії: quantity
+    зарезервована кількість: reserved
+  Постачальник:
+    назва постачальника: name
+    телефон постачальника: phone
+  Поставка:
+    номер накладної: invoice_number
+    дата поставки: delivery_date
+  Покупець:
+    номер телефону: phone
+    ПІБ покупця: full_name
+  Резервування:
+    код резервування: code
+    дата створення: created_at
+    строк дії резервування: expires_at
+    кількість упаковок: quantity
+    кількість продовжень: extensions
+    стан резервування: state
+  Лікар:
+    ПІБ лікаря: full_name
+    спеціальність: specialty
+  Електронний рецепт:
+    номер рецепта: number
+    дата виписки: issued_on
+    МНН рецепта: inn
+    призначена кількість: prescribed_quantity
+    частка реімбурсації: reimbursement_share
+    стан рецепта: state
+  Продаж:
+    номер чека: number
+    дата продажу: sold_at
+    спосіб оплати: payment_method
+    сума чека: total
+  Позиція продажу:
+    кількість у позиції: quantity
+    ціна за упаковку: unit_price
