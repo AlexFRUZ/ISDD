@@ -1,0 +1,4 @@
+Збережено: diagrams/uc_reservation.puml
+Збережено: diagrams/uc_sales.puml
+Збережено: diagrams/uc_warehouse.puml
+Use cases: 13, акторів: 7, зауважень: 0

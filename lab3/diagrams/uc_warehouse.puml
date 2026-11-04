@@ -1,0 +1,23 @@
+@startuml uc_warehouse
+title Діаграма варіантів використання: підсистема «Склад і звітність»
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Працівник аптеки" as A1
+actor "Завідувач аптеки" as A2
+actor "Директор мережі" as A3
+
+rectangle "Склад і звітність" {
+  usecase "UC10 Прийняти поставку" as UC10
+  usecase "UC11 Списати партію" as UC11
+  usecase "UC12 Переглянути строки придатності" as UC12
+  usecase "UC13 Сформувати звіт про продажі" as UC13
+}
+
+A1 <|-- A2
+A2 -- UC10
+A2 -- UC11
+A2 -- UC12
+A2 -- UC13
+A3 -- UC13
+@enduml

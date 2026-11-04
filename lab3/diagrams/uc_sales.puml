@@ -1,0 +1,24 @@
+@startuml uc_sales
+title Діаграма варіантів використання: підсистема «Продаж»
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Працівник аптеки" as A1
+actor "Фармацевт" as A2
+actor "Реєстр е-рецептів" as A3 <<система>>
+
+rectangle "Продаж" {
+  usecase "UC6 Видати резерв" as UC6
+  usecase "UC7 Продати за е-рецептом" as UC7
+  usecase "UC8 Продати безрецептурний препарат" as UC8
+  usecase "UC9 Перевірити е-рецепт" as UC9
+}
+
+A1 <|-- A2
+A2 -- UC6
+A2 -- UC7
+A3 -- UC7
+UC7 ..> UC9 : <<include>>
+A2 -- UC8
+A3 -- UC9
+@enduml
