@@ -1,0 +1,12 @@
+Модулів: 24, імпортів між пакетами: 25
+Цикли: немає
+Пакет           вхідні  вихідні
+ui                   0        2
+controllers          1        4
+network              1        1
+persistence          1        1
+domain               3        1
+foundation           3        0
+Немає в задумі: немає
+Задумано, але не використано: немає
+Збережено: diagrams/actual_packages.puml

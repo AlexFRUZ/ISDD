@@ -1,0 +1,46 @@
+@startuml packages
+title Задумана N-рівнева архітектура ІС «Мережа аптек»
+skinparam packageStyle folder
+skinparam nodesep 40
+skinparam ranksep 60
+
+package "ui (подання)" as ui {
+  component "cli" as cli
+}
+package "controllers (контролери)" as controllers {
+  package "Резервування" as c_res {
+    component "ReservationController\n(КонтролерРезервування)" as rc
+  }
+  package "Продаж" as c_sale {
+    component "PrescriptionSaleController\n(КонтролерПродажу)" as sc
+  }
+  component "factory" as factory
+}
+package "network (мережева взаємодія)" as network {
+  component "PrescriptionRegistry\nLocalRegistry" as reg
+}
+package "persistence (збереження)" as persistence {
+  component "Store\nMemoryStore" as st
+}
+package "domain (бізнес-об'єкти)" as domain {
+  component "Pharmacy, PharmacyChain,\nPharmacist" as d1
+  component "Drug, PrescriptionDrug,\nOtcDrug, Batch" as d2
+  component "Customer, Reservation" as d3
+  component "EPrescription, Doctor" as d4
+  component "Sale, SaleLine" as d5
+  component "Supplier, Delivery" as d6
+}
+package "foundation (основи)" as foundation {
+  component "errors, clock" as f1
+}
+
+ui ..> controllers
+ui ..> foundation
+controllers ..> network
+controllers ..> persistence
+controllers ..> domain
+controllers ..> foundation
+network ..> domain
+persistence ..> domain
+domain ..> foundation
+@enduml

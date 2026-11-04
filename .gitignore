@@ -7,3 +7,4 @@ htmlcov/
 *.sqlite3
 *.db
 pharmacy_data.json
+pharmacy_data.pkl

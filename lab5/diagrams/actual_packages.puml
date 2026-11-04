@@ -1,0 +1,27 @@
+@startuml actual_packages
+title Фактичні залежності між пакетами
+skinparam packageStyle folder
+
+package "ui" as ui {
+}
+package "controllers" as controllers {
+}
+package "network" as network {
+}
+package "persistence" as persistence {
+}
+package "domain" as domain {
+}
+package "foundation" as foundation {
+}
+
+ui ..> controllers
+ui ..> foundation
+controllers ..> domain
+controllers ..> foundation
+controllers ..> network
+controllers ..> persistence
+network ..> domain
+persistence ..> domain
+domain ..> foundation
+@enduml

@@ -1,0 +1,13 @@
+Модулів: 24, імпортів між пакетами: 26
+ПОРУШЕННЯ pharmacy/domain/sale.py:8
+  domain -> ui (заборонено: залежність угору)
+Цикли: controllers -> domain -> ui -> controllers
+Пакет           вхідні  вихідні
+ui                   1        2
+controllers          1        4
+network              1        1
+persistence          1        1
+domain               3        2
+foundation           3        0
+Немає в задумі: domain -> ui
+Задумано, але не використано: network -> foundation, persistence -> foundation
