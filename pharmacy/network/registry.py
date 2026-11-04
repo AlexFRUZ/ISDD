@@ -20,8 +20,15 @@ class PrescriptionRegistry(Protocol):
     def redeem(self, recipe: EPrescription, quantity: int, today: date) -> None: ...
 
 
+class PrescriptionSource(Protocol):
+    """Сховище рецептів, яке імітує дані реєстру. Рівень network про рівень збереження не знає."""
+
+    def get(self, key: str) -> EPrescription | None: ...
+    def save(self, entity: EPrescription) -> None: ...
+
+
 class LocalRegistry:
-    def __init__(self, prescriptions: dict[str, EPrescription], online: bool = True) -> None:
+    def __init__(self, prescriptions: PrescriptionSource, online: bool = True) -> None:
         self._prescriptions = prescriptions
         self.online = online
 
@@ -32,3 +39,4 @@ class LocalRegistry:
         if not self.online:
             raise RegistryUnavailable
         recipe.redeem(quantity, today)
+        self._prescriptions.save(recipe)

@@ -90,7 +90,7 @@ def dcd_classes():
         yield match.group(1), re.findall(r"\+(\w+)\(", match.group(2))
 
 
-MODULES = ["pharmacy.domain", "pharmacy.persistence.store", "pharmacy.network.registry",
+MODULES = ["pharmacy.domain", "pharmacy.persistence.repositories", "pharmacy.network.registry",
            "pharmacy.controllers.prescription_sale_controller",
            "pharmacy.controllers.reservation_controller"]
 

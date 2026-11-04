@@ -48,6 +48,8 @@ class EPrescription:
         """Причина недійсності або None для чинного рецепта. Експерт: рецепт знає свій стан."""
         if self.state is not PrescriptionState.ACTIVE:
             return f"стан «{self.state.value}»"
+        if self.issued_on > today:
+            return "дата виписки ще не настала"
         if today - self.issued_on > timedelta(days=PRESCRIPTION_VALID_DAYS):
             return "минув строк дії"
         return None

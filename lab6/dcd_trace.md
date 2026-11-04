@@ -1,5 +1,7 @@
 # Трасування діаграми класів проєкту до правил виведення
 
+У ЛР 7 клас `Store` замінено на `UnitOfWork` із репозиторіями, тому діаграму оновлено.
+
 Діаграму виведено з таблиць `uc7_sale_v2.csv`, `uc2_reserve_v2.csv` і доменної моделі за
 правилами Kung [2, с. 248–255].
 
@@ -7,7 +9,7 @@
 |---|---|---|---|
 | `PrescriptionSaleController` | клас | об'єкт надсилає й отримує повідомлення | UC7, рядок 2 |
 | `ReservationController` | клас | об'єкт надсилає й отримує повідомлення | UC2, рядок 2 |
-| `Store` (DBMgr) | клас | об'єкт отримує повідомлення | UC7, рядок 3 |
+| `UnitOfWork`, `Repository` (DBMgr) | класи | об'єкт отримує повідомлення | UC7, рядок 3 |
 | `PrescriptionRegistry` (Реєстр) | клас | об'єкт отримує повідомлення | UC7, рядок 5 |
 | `PricingPolicy` | клас | тип результату повідомлення | UC7, рядки 13 і 18 |
 | `Drug`, `PrescriptionDrug`, `OtcDrug` | класи | батьківські класи з доменної моделі | ЛР 2 |
@@ -30,7 +32,7 @@
 | контролер → `Sale` | зв'язок create | об'єкт створює інший об'єкт | UC7, рядок 14 |
 | `Sale` → `SaleLine` | зв'язок create | об'єкт створює інший об'єкт | UC7, рядок 17 |
 | `Customer` → `Reservation` | зв'язок create | об'єкт створює інший об'єкт | UC2, рядок 14 |
-| контролер → `Store` | зв'язок call | об'єкт викликає метод іншого | UC7, рядок 3 |
+| контролер → `UnitOfWork` | зв'язок call | об'єкт викликає метод іншого | UC7, рядок 3 |
 | `Pharmacy` – `Batch` | асоціація | доменна модель | ЛР 2 |
 | (`Sale`, `Batch`) .. `SaleLine` | асоціативний клас | доменна модель | ЛР 2 |
 | `PharmacyChain` – `Pharmacy` | агрегація | доменна модель | ЛР 2 |
@@ -58,5 +60,5 @@
 6. `Doctor`, `EPrescription`.
 7. `Reservation`, `Customer`.
 8. `SaleLine`, `Sale`.
-9. `Store`, `PrescriptionRegistry` та їхні реалізації.
+9. `UnitOfWork`, репозиторії, `PrescriptionRegistry` та їхні реалізації.
 10. `ReservationController`, `PrescriptionSaleController`.

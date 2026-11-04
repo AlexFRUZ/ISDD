@@ -11,15 +11,15 @@ class PrescriptionSaleController <<controller>> {
 class ReservationController <<controller>> {
   +reserve(phone: str, pharmacy_number: str, trade_name: str, quantity: int, recipe_number: str): ReservationResult
 }
-class Store <<interface>> {
-  +find_pharmacist(personnel_number: str): Pharmacist
-  +find_pharmacy(number: str): Pharmacy
-  +find_customer(phone: str): Customer
-  +save_customer(customer: Customer)
-  +save_reservation(reservation: Reservation)
-  +save_sale(sale: Sale)
+class UnitOfWork <<interface>> {
+  +transaction()
   +next_number(kind: str): int
-  +commit()
+  +clear()
+}
+class Repository <<interface>> {
+  +get(key): Entity
+  +save(entity: Entity)
+  +delete(key)
 }
 class PrescriptionRegistry <<interface>> {
   +find(number: str): EPrescription
@@ -112,12 +112,13 @@ class LoyaltyPricing <<concrete strategy>> {
   +amount_due(subtotal: Decimal): Decimal
 }
 
-PrescriptionSaleController ..> Store : <<call>>
+PrescriptionSaleController ..> UnitOfWork : <<call>>
 PrescriptionSaleController ..> PrescriptionRegistry : <<call>>
 PrescriptionSaleController ..> Sale : <<create>>
 PrescriptionSaleController ..> Pharmacy : <<call>>
 PrescriptionSaleController ..> EPrescription : <<call>>
-ReservationController ..> Store : <<call>>
+ReservationController ..> UnitOfWork : <<call>>
+UnitOfWork "1" o-- "8" Repository
 ReservationController ..> PrescriptionRegistry : <<call>>
 ReservationController ..> Customer : <<call>>
 ReservationController ..> Pharmacy : <<call>>

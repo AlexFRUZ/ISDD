@@ -223,3 +223,23 @@ def test_delivery_needs_at_least_one_batch():
 def test_reimbursement_share_range(doctor, share):
     with pytest.raises(d.DomainError, match="реімбурсації"):
         d.EPrescription("E-5", TODAY, "Amoxicillin", 1, doctor, reimbursement_share=share)
+
+
+def test_pharmacy_can_be_removed_while_others_remain(pharmacy):
+    other = d.Pharmacy("А-02", "вул. Проскурівська, 7", "Хмельницький", "+380382000002", "8:00-22:00")
+    chain = d.PharmacyChain("Мережа", "12345678", [pharmacy, other])
+    chain.remove_pharmacy(pharmacy)
+    assert chain.pharmacies == [other]
+
+
+def test_delivery_registers_itself_at_supplier(batch):
+    supplier = d.Supplier("Оптима", "+380441110000")
+    delivery = d.Delivery("Н-1", TODAY, supplier, [batch])
+    assert supplier.deliveries == [delivery]
+
+
+def test_finished_reservation_can_be_archived(customer, batch):
+    reservation = reserve(customer, batch)
+    reservation.cancel()
+    reservation.archive()
+    assert reservation.state is d.ReservationState.ARCHIVED

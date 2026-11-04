@@ -69,6 +69,18 @@ class Reservation:
         self.customer.reservations.append(self)
         self.check_invariant()
 
+    @classmethod
+    def restore(cls, **fields) -> Reservation:
+        """Відновлює збережений об'єкт без умов створення.
+
+        Умови створення діють лише в момент резервування. Давнє резервування не стає
+        некоректним через те, що партія з часом втратила залишковий строк придатності.
+        """
+        reservation = cls.__new__(cls)
+        reservation.__dict__.update(fields)
+        reservation.customer.reservations.append(reservation)
+        return reservation
+
     def check_invariant(self) -> None:
         invariant(self.is_allowed_quantity(self.quantity), "Кількість резервування поза допустимими межами")
         invariant(self.expires_at > self.created_at, "Строк дії має бути пізнішим за дату створення")

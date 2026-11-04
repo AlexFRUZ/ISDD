@@ -16,7 +16,7 @@ from pharmacy.foundation.clock import Clock, system_clock
 from pharmacy.foundation.contracts import ensure
 from pharmacy.foundation.errors import Refused
 from pharmacy.network.registry import PrescriptionRegistry
-from pharmacy.persistence.store import Store
+from pharmacy.persistence.repositories import UnitOfWork
 
 
 @dataclass(frozen=True)
@@ -29,8 +29,8 @@ class ReservationResult:
 
 
 class ReservationController:
-    def __init__(self, store: Store, registry: PrescriptionRegistry, clock: Clock = system_clock) -> None:
-        self.store = store
+    def __init__(self, uow: UnitOfWork, registry: PrescriptionRegistry, clock: Clock = system_clock) -> None:
+        self.uow = uow
         self.registry = registry
         self.clock = clock
 
@@ -42,26 +42,27 @@ class ReservationController:
         if not Reservation.is_allowed_quantity(quantity):
             raise Refused("4a", f"Можна резервувати від {MIN_RESERVATION_QUANTITY} "
                                 f"до {MAX_RESERVATION_QUANTITY} упаковок")
-        customer = self.store.find_customer(phone) or Customer(phone, "")
-        if not customer.can_reserve:
-            raise Refused("3a", f"Покупець уже має {MAX_ACTIVE_RESERVATIONS} активні резервування")
-        batch = self._batch_for(pharmacy_number, trade_name, quantity, today)
-        recipe = self._recipe_for(batch, recipe_number, today)
-        available_before = batch.available
+        with self.uow.transaction():  # резервування, партія й покупець змінюються разом
+            customer = self.uow.customers.get(phone) or Customer(phone, "")
+            if not customer.can_reserve:
+                raise Refused("3a", f"Покупець уже має {MAX_ACTIVE_RESERVATIONS} активні резервування")
+            batch = self._batch_for(pharmacy_number, trade_name, quantity, today)
+            recipe = self._recipe_for(batch, recipe_number, today)
+            available_before = batch.available
 
-        code = f"R-{self.store.next_number('reservation')}"
-        reservation = customer.create_reservation(code, now, quantity, batch, recipe)
-        reservation.confirm()
-        self.store.save_customer(customer)
-        self.store.save_reservation(reservation)
-        self.store.commit()
+            code = f"R-{self.uow.next_number('reservation')}"
+            reservation = customer.create_reservation(code, now, quantity, batch, recipe)
+            reservation.confirm()
+            self.uow.customers.save(customer)
+            self.uow.batches.save(batch)
+            self.uow.reservations.save(reservation)
 
-        ensure(reservation.state is ReservationState.CONFIRMED, "резервування підтверджено")
-        ensure(batch.available == available_before - quantity, "доступний залишок зменшено")
+            ensure(reservation.state is ReservationState.CONFIRMED, "резервування підтверджено")
+            ensure(batch.available == available_before - quantity, "доступний залишок зменшено")
         return ReservationResult(code, batch.drug.trade_name, batch.series, quantity, reservation.expires_at)
 
     def _batch_for(self, pharmacy_number: str, trade_name: str, quantity: int, today: date) -> Batch:
-        pharmacy = self.store.find_pharmacy(pharmacy_number)
+        pharmacy = self.uow.pharmacies.get(pharmacy_number)
         batch = pharmacy.pick_batch_for_reservation(trade_name, quantity, today) if pharmacy else None
         if batch is None:
             raise Refused("5a", f"В аптеці {pharmacy_number} немає придатної партії препарату {trade_name}")

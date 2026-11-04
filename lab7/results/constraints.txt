@@ -1,0 +1,26 @@
+ВІДКИНУТО  запис-сирота: партія неіснуючої аптеки
+           FOREIGN KEY constraint failed
+ВІДКИНУТО  запис-сирота: резервування неіснуючого покупця
+           FOREIGN KEY constraint failed
+ВІДКИНУТО  видалення препарату, на який посилаються партії
+           FOREIGN KEY constraint failed
+ВІДКИНУТО  дублікат унікального значення: ЄДРПОУ мережі
+           UNIQUE constraint failed: pharmacy_chain.edrpou
+ВІДКИНУТО  дублікат унікального значення: один рецепт у двох продажах
+           UNIQUE constraint failed: sale.prescription_number
+ВІДКИНУТО  CHECK: кількість резервування 6
+           CHECK constraint failed: quantity BETWEEN 1 AND 5
+ВІДКИНУТО  CHECK: зарезервовано більше, ніж є в партії
+           CHECK constraint failed: reserved BETWEEN 0 AND quantity
+ВІДКИНУТО  CHECK: від'ємний залишок
+           CHECK constraint failed: quantity >= 0
+ВІДКИНУТО  CHECK: невідомий стан резервування
+           CHECK constraint failed: state IN ('Нове', 'Підтверджене', 'Готове', 'Продовжене',
+                                                       'Видане', 'Скасоване', 'Прострочене', '[*]')
+ВІДКИНУТО  CHECK: строк дії раніший за створення
+           CHECK constraint failed: expires_at > created_at
+ВІДКИНУТО  CHECK: частка реімбурсації понад 100 %
+           CHECK constraint failed: reimbursement_bp BETWEEN 0 AND 10000
+ВІДКИНУТО  NOT NULL: препарат без МНН
+           NOT NULL constraint failed: drug.inn
+Перевірено: 12, прийнято некоректних: 0

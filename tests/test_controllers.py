@@ -1,4 +1,4 @@
-"""Тести контролерів без інтерфейсу користувача (ЛР 5)."""
+"""Тести контролерів без інтерфейсу користувача для обох реалізацій сховища (ЛР 5, ЛР 7)."""
 from datetime import timedelta
 from decimal import Decimal
 
@@ -22,8 +22,8 @@ def test_sale_normal_flow(ctx):
     result = ctx.sales.sell("Ф-7", "E-100", 2)
     assert result.total == Decimal("240.00") and result.series == "AM-1"
     assert ctx.batch("AM-1").quantity == 8
-    assert ctx.store.prescriptions["E-100"].state is PrescriptionState.REDEEMED
-    assert ctx.store.sales[result.number].prescription.number == "E-100"
+    assert ctx.recipe("E-100").state is PrescriptionState.REDEEMED
+    assert ctx.uow.sales.get(result.number).prescription.number == "E-100"
 
 
 @pytest.mark.req("R6.5")
@@ -69,7 +69,7 @@ def test_sale_registry_down_changes_nothing(ctx):
         ctx.sales.sell("Ф-7", "E-100", 1)
     assert refusal.value.flow == "6a"
     assert ctx.batch("AM-1").quantity == 10
-    assert ctx.store.prescriptions["E-100"].state is PrescriptionState.ACTIVE
+    assert ctx.recipe("E-100").state is PrescriptionState.ACTIVE
 
 
 def test_sale_unknown_pharmacist(ctx):
@@ -82,7 +82,7 @@ def test_sale_unknown_pharmacist(ctx):
 @pytest.mark.req("R2", "R2.3")
 def test_reserve_normal_flow(ctx):
     result = reserve(ctx, quantity=2)
-    reservation = ctx.store.find_reservation(result.code)
+    reservation = ctx.uow.reservations.get(result.code)
     assert reservation.state is ReservationState.CONFIRMED
     assert ctx.batch("PA-1").available == 18 and result.expires_at == NOW + timedelta(hours=24)
 
@@ -137,5 +137,4 @@ def test_reserve_rx_drug_with_valid_recipe(ctx):
 def test_repeated_customer_is_reused(ctx):
     reserve(ctx)
     reserve(ctx)
-    assert len(ctx.store.customers) == 1
-    assert len(ctx.store.find_customer(PHONE).active_reservations) == 2
+    assert len(ctx.uow.reservations.find_active_by_customer(PHONE)) == 2

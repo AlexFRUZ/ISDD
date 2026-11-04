@@ -1,34 +1,43 @@
-"""Демонстраційні дані для сховища в пам'яті."""
+"""Заповнення сховища демонстраційними даними через репозиторії.
+
+Той самий код наповнює обидві реалізації, тому тести порівнюють їх на однакових даних.
+Файл seed.sql наповнює базу, створену для консольної програми.
+"""
 from __future__ import annotations
 
 from datetime import date, timedelta
 from decimal import Decimal
-from pathlib import Path
 
 from pharmacy.domain import (
     Batch, Doctor, EPrescription, OtcDrug, Pharmacist, Pharmacy, PharmacyChain,
     PrescriptionDrug, PrescriptionState,
 )
-from pharmacy.persistence.store import MemoryStore
+from pharmacy.persistence.repositories import UnitOfWork
 
 
-def build_demo_store(today: date, path: str | Path | None = None) -> MemoryStore:
+def populate(uow: UnitOfWork, today: date) -> None:
     first = Pharmacy("А-01", "вул. Подільська, 1", "Хмельницький", "+380382000001", "8:00-20:00")
     second = Pharmacy("А-02", "вул. Проскурівська, 7", "Хмельницький", "+380382000002", "8:00-22:00")
-    store = MemoryStore(PharmacyChain("Мережа аптек", "12345678", [first, second]), path)
+    uow.pharmacies.save_chain(PharmacyChain("Мережа аптек", "12345678", [first, second]))
 
-    amoxicillin = PrescriptionDrug("Амоксил", "Amoxicillin", "таблетки", "500 мг", "Київмедпрепарат")
-    insulin = PrescriptionDrug("Актрапід", "Insulin", "ампули", "100 МО/мл", "Ново Нордіск")
+    amoxicillin = PrescriptionDrug("Амоксил", "Amoxicillin", "таблетки", "500 мг", "Київмедпрепарат", control_group="антибіотики")
+    insulin = PrescriptionDrug("Актрапід", "Insulin", "ампули", "100 МО/мл", "Ново Нордіск", control_group="інсуліни")
     paracetamol = OtcDrug("Парацетамол", "Paracetamol", "таблетки", "500 мг", "Дарниця")
-    later, sooner = today + timedelta(days=365), today + timedelta(days=90)
-    Batch("AM-1", sooner, Decimal("80"), Decimal("120.00"), 10, amoxicillin, first)
-    Batch("AM-2", later, Decimal("85"), Decimal("125.00"), 10, amoxicillin, first)
-    Batch("IN-1", later, Decimal("300"), Decimal("400.00"), 5, insulin, second)
-    Batch("PA-1", later, Decimal("20"), Decimal("35.50"), 20, paracetamol, first)
-    Batch("PA-0", today + timedelta(days=10), Decimal("20"), Decimal("30.00"), 20, paracetamol, first)
+    for drug in (amoxicillin, insulin, paracetamol):
+        uow.drugs.save(drug)
 
-    pharmacist = Pharmacist("Ф-7", "Бойко Ірина", first)
-    store.pharmacists[pharmacist.personnel_number] = pharmacist
+    later, sooner = today + timedelta(days=365), today + timedelta(days=90)
+    batches = [
+        Batch("AM-1", sooner, Decimal("80"), Decimal("120.00"), 10, amoxicillin, first),
+        Batch("AM-2", later, Decimal("85"), Decimal("125.00"), 10, amoxicillin, first),
+        Batch("IN-1", later, Decimal("300"), Decimal("400.00"), 5, insulin, second),
+        Batch("PA-1", later, Decimal("20"), Decimal("35.50"), 20, paracetamol, first),
+        Batch("PA-0", today + timedelta(days=10), Decimal("20"), Decimal("30.00"), 20, paracetamol, first),
+    ]
+    for batch in batches:
+        uow.batches.save(batch)
+
+    uow.pharmacists.save(Pharmacist("Ф-7", "Бойко Ірина", first))
 
     doctor = Doctor("Коваль Петро", "терапевт")
     recipes = [
@@ -39,5 +48,5 @@ def build_demo_store(today: date, path: str | Path | None = None) -> MemoryStore
         EPrescription("E-300", today, "Amoxicillin", 1, doctor, state=PrescriptionState.REDEEMED),
         EPrescription("E-301", today, "Amoxicillin", 1, doctor, state=PrescriptionState.CANCELLED),
     ]
-    store.prescriptions.update({r.number: r for r in recipes})
-    return store
+    for recipe in recipes:
+        uow.prescriptions.save(recipe)

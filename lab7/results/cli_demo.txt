@@ -1,0 +1,16 @@
+$ python -m pharmacy.ui.cli seed
+Демонстраційні дані збережено: pharmacy.sqlite3
+$ python -m pharmacy.ui.cli reserve --phone +380671112233 --pharmacy А-01 --drug Парацетамол --qty 2
+Резервування R-6 створено: Парацетамол, партія PA-1, 2 уп. Дійсне до 05.11.2026 20:13
+$ python -m pharmacy.ui.cli reserve --phone +380671112233 --pharmacy А-01 --drug Парацетамол --qty 9
+Відмова (потік 4a): Можна резервувати від 1 до 5 упаковок
+$ python -m pharmacy.ui.cli reserve --phone +380671112233 --pharmacy А-01 --drug Амоксил --qty 1 --recipe E-101
+Резервування R-7 створено: Амоксил, партія AM-1, 1 уп. Дійсне до 05.11.2026 20:13
+$ python -m pharmacy.ui.cli sell --pharmacist Ф-7 --recipe E-100 --qty 2
+Продаж Ч-6 оформлено: Амоксил, партія AM-1, 2 уп., до сплати 240.00 грн
+$ python -m pharmacy.ui.cli sell --pharmacist Ф-7 --recipe E-100 --qty 1
+Відмова (потік 3b): Рецепт E-100 недійсний: стан «погашений»
+$ python -m pharmacy.ui.cli sell --pharmacist Ф-7 --recipe E-200
+Відмова (потік 3b): Рецепт E-200 недійсний: минув строк дії
+$ python -m pharmacy.ui.cli sell --pharmacist Ф-7 --recipe E-101 --registry-down
+Відмова (потік 6a): Реєстр е-рецептів недоступний. Продаж не оформлено.

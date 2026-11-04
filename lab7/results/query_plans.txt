@@ -1,0 +1,22 @@
+Партій: 100000, резервувань: 60000
+
+ДО створення індексів
+  UC7, UC2: партії аптеки (SqliteBatchRepository.load_for)
+    SCAN b
+    SEARCH s USING INDEX sqlite_autoindex_drug_series_1 (drug_id=? AND series=?)
+    медіана 5.302 мс
+  UC2: резервування покупця (SqliteReservationRepository.load_for)
+    SCAN reservation
+    медіана 3.040 мс
+
+ПІСЛЯ створення індексів
+  UC7, UC2: партії аптеки (SqliteBatchRepository.load_for)
+    SEARCH b USING INDEX idx_batch_pharmacy_drug (pharmacy_number=?)
+    SEARCH s USING INDEX sqlite_autoindex_drug_series_1 (drug_id=? AND series=?)
+    медіана 0.632 мс
+  UC2: резервування покупця (SqliteReservationRepository.load_for)
+    SEARCH reservation USING INDEX idx_reservation_customer_state (customer_phone=?)
+    медіана 0.006 мс
+
+UC7, UC2: партії аптеки (SqliteBatchRepository.load_for): прискорення у 8 разів
+UC2: резервування покупця (SqliteReservationRepository.load_for): прискорення у 493 разів

@@ -2,27 +2,30 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date
 from pathlib import Path
 
 from pharmacy.controllers.prescription_sale_controller import PrescriptionSaleController
 from pharmacy.controllers.reservation_controller import ReservationController
 from pharmacy.network.registry import LocalRegistry
-from pharmacy.persistence.seed import build_demo_store
-from pharmacy.persistence.store import MemoryStore
+from pharmacy.persistence.repositories import UnitOfWork
+from pharmacy.persistence.sqlite import create_database, open_database
 
 
 @dataclass
 class App:
+    uow: UnitOfWork
     reservations: ReservationController
     sales: PrescriptionSaleController
 
+    def close(self) -> None:
+        self.uow.close()
 
-def create_demo_data(path: str | Path, today: date) -> None:
-    build_demo_store(today, path).commit()
+
+def create_demo_data(path: str | Path) -> None:
+    create_database(path)
 
 
 def build_app(path: str | Path, registry_online: bool = True) -> App:
-    store = MemoryStore.load(path)
-    registry = LocalRegistry(store.prescriptions, registry_online)
-    return App(ReservationController(store, registry), PrescriptionSaleController(store, registry))
+    uow = open_database(path)
+    registry = LocalRegistry(uow.prescriptions, registry_online)
+    return App(uow, ReservationController(uow, registry), PrescriptionSaleController(uow, registry))

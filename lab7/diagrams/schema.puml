@@ -1,0 +1,153 @@
+@startuml schema
+title Реляційна схема ІС «Мережа аптек»
+hide circle
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 60
+
+entity "batch" as batch {
+  * batch_id : INTEGER <<PK>>
+  --
+  * drug_id : INTEGER <<FK>>
+  * series : TEXT <<FK>>
+  * pharmacy_number : TEXT <<FK>>
+   invoice_number : TEXT <<FK>>
+  * purchase_price_kop : INTEGER
+  * retail_price_kop : INTEGER
+  * quantity : INTEGER
+  * reserved : INTEGER
+}
+entity "customer" as customer {
+  * phone : TEXT <<PK>>
+  --
+  * full_name : TEXT
+}
+entity "delivery" as delivery {
+  * invoice_number : TEXT <<PK>>
+  --
+  * delivery_date : TEXT
+  * supplier_id : INTEGER <<FK>>
+}
+entity "doctor" as doctor {
+  * doctor_id : INTEGER <<PK>>
+  --
+  * full_name : TEXT
+  * specialty : TEXT
+}
+entity "drug" as drug {
+  * drug_id : INTEGER <<PK>>
+  --
+  * trade_name : TEXT
+  * inn : TEXT
+  * dosage_form : TEXT
+  * dosage : TEXT
+  * manufacturer : TEXT
+}
+entity "drug_series" as drug_series {
+  * drug_id : INTEGER <<PK, FK>>
+  * series : TEXT <<PK>>
+  --
+  * expiry_date : TEXT
+}
+entity "otc_drug" as otc_drug {
+  * drug_id : INTEGER <<PK, FK>>
+  --
+  * check_limit : INTEGER
+}
+entity "pharmacist" as pharmacist {
+  * personnel_number : TEXT <<PK>>
+  --
+  * full_name : TEXT
+  * pharmacy_number : TEXT <<FK>>
+}
+entity "pharmacy" as pharmacy {
+  * number : TEXT <<PK>>
+  --
+  * chain_id : INTEGER <<FK>>
+  * address : TEXT
+  * city : TEXT
+  * phone : TEXT
+  * schedule : TEXT
+}
+entity "pharmacy_chain" as pharmacy_chain {
+  * chain_id : INTEGER <<PK>>
+  --
+  * name : TEXT
+  * edrpou : TEXT
+}
+entity "prescription" as prescription {
+  * number : TEXT <<PK>>
+  --
+  * issued_on : TEXT
+  * inn : TEXT
+  * prescribed_quantity : INTEGER
+  * reimbursement_bp : INTEGER
+  * state : TEXT
+  * doctor_id : INTEGER <<FK>>
+}
+entity "prescription_drug" as prescription_drug {
+  * drug_id : INTEGER <<PK, FK>>
+  --
+  * control_group : TEXT
+}
+entity "reservation" as reservation {
+  * code : TEXT <<PK>>
+  --
+  * created_at : TEXT
+  * expires_at : TEXT
+  * quantity : INTEGER
+  * extensions : INTEGER
+  * state : TEXT
+  * customer_notified : INTEGER
+  * customer_phone : TEXT <<FK>>
+  * batch_id : INTEGER <<FK>>
+   prescription_number : TEXT <<FK>>
+}
+entity "sale" as sale {
+  * number : TEXT <<PK>>
+  --
+  * sold_at : TEXT
+  * payment_method : TEXT
+  * total_kop : INTEGER
+  * personnel_number : TEXT <<FK>>
+   customer_phone : TEXT <<FK>>
+   prescription_number : TEXT <<FK>>
+}
+entity "sale_line" as sale_line {
+  * sale_number : TEXT <<PK, FK>>
+  * batch_id : INTEGER <<PK, FK>>
+  --
+  * quantity : INTEGER
+  * unit_price_kop : INTEGER
+}
+entity "sequence" as sequence {
+  * kind : TEXT <<PK>>
+  --
+  * value : INTEGER
+}
+entity "supplier" as supplier {
+  * supplier_id : INTEGER <<PK>>
+  --
+  * name : TEXT
+  * phone : TEXT
+}
+
+batch }o--|| delivery
+batch }o--|| drug_series
+batch }o--|| pharmacy
+delivery }o--|| supplier
+drug_series }o--|| drug
+otc_drug }o--|| drug
+pharmacist }o--|| pharmacy
+pharmacy }o--|| pharmacy_chain
+prescription }o--|| doctor
+prescription_drug }o--|| drug
+reservation }o--|| batch
+reservation }o--|| customer
+reservation }o--|| prescription
+sale }o--|| customer
+sale }o--|| pharmacist
+sale }o--|| prescription
+sale_line }o--|| batch
+sale_line }o--|| sale
+@enduml
