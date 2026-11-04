@@ -117,9 +117,9 @@ def test_cancelled_reservation_frees_customer_slot(customer, batch):
     assert reserve(customer, batch, "R-4").is_active
 
 
-@pytest.mark.parametrize("quantity", [0, 6])
+@pytest.mark.parametrize("quantity", [0, 7])
 def test_reservation_quantity_limits(customer, batch, quantity):
-    with pytest.raises(d.DomainError, match="від 1 до 5"):
+    with pytest.raises(d.DomainError, match="від 1 до 6"):
         reserve(customer, batch, quantity=quantity)
 
 

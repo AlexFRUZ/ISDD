@@ -8,8 +8,8 @@
            UNIQUE constraint failed: pharmacy_chain.edrpou
 ВІДКИНУТО  дублікат унікального значення: один рецепт у двох продажах
            UNIQUE constraint failed: sale.prescription_number
-ВІДКИНУТО  CHECK: кількість резервування 6
-           CHECK constraint failed: quantity BETWEEN 1 AND 5
+ВІДКИНУТО  CHECK: кількість резервування 7
+           CHECK constraint failed: quantity BETWEEN 1 AND 6
 ВІДКИНУТО  CHECK: зарезервовано більше, ніж є в партії
            CHECK constraint failed: reserved BETWEEN 0 AND quantity
 ВІДКИНУТО  CHECK: від'ємний залишок

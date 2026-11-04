@@ -49,7 +49,7 @@
 |---|---|
 | `Batch`: `quantity >= 0` | `CHECK (quantity >= 0)` |
 | `Batch`: `0 <= reserved <= quantity` | `CHECK (reserved BETWEEN 0 AND quantity)` |
-| `Reservation`: `1 <= quantity <= 5` | `CHECK (quantity BETWEEN 1 AND 5)` |
+| `Reservation`: `1 <= quantity <= 6` | `CHECK (quantity BETWEEN 1 AND 6)` |
 | `Reservation`: `extensions <= 1` | `CHECK (extensions BETWEEN 0 AND 1)` |
 | `Reservation`: `expires_at > created_at` | `CHECK (expires_at > created_at)` |
 | `EPrescription`: `prescribed_quantity >= 1` | `CHECK (prescribed_quantity >= 1)` |

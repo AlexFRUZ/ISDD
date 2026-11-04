@@ -102,9 +102,9 @@ def test_reserve_limit_of_active_reservations(ctx):
 
 
 @pytest.mark.req("R2.2")
-@pytest.mark.parametrize("quantity", [0, 6])
+@pytest.mark.parametrize("quantity", [0, 7])
 def test_reserve_quantity_limits(ctx, quantity):
-    with pytest.raises(Refused, match="від 1 до 5"):
+    with pytest.raises(Refused, match="від 1 до 6"):
         reserve(ctx, quantity=quantity)
 
 

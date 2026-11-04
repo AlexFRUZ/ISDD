@@ -24,8 +24,8 @@ BAD_STATEMENTS = {
         "INSERT INTO pharmacy_chain VALUES (2, 'Інша мережа', '12345678')",
     "дублікат унікального значення: один рецепт у двох продажах":
         "UPDATE sale SET prescription_number = 'E-100' WHERE number IN ('Ч-1', 'Ч-2')",
-    "CHECK: кількість резервування 6":
-        "UPDATE reservation SET quantity = 6 WHERE code = 'R-5'",
+    "CHECK: кількість резервування 7":
+        "UPDATE reservation SET quantity = 7 WHERE code = 'R-5'",
     "CHECK: зарезервовано більше, ніж є в партії":
         "UPDATE batch SET reserved = quantity + 1 WHERE batch_id = 1",
     "CHECK: від'ємний залишок":

@@ -104,7 +104,7 @@ CREATE TABLE reservation (
     code                TEXT PRIMARY KEY,
     created_at          TEXT NOT NULL,
     expires_at          TEXT NOT NULL,
-    quantity            INTEGER NOT NULL CHECK (quantity BETWEEN 1 AND 5),
+    quantity            INTEGER NOT NULL CHECK (quantity BETWEEN 1 AND 6),
     extensions          INTEGER NOT NULL DEFAULT 0 CHECK (extensions BETWEEN 0 AND 1),
     state               TEXT NOT NULL CHECK (state IN ('Нове', 'Підтверджене', 'Готове', 'Продовжене',
                                                        'Видане', 'Скасоване', 'Прострочене', '[*]')),

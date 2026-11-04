@@ -1,0 +1,19 @@
+E   sqlite3.IntegrityError: CHECK constraint failed: quantity BETWEEN 1 AND 5
+/home/alex/pharmacy-is/pharmacy/persistence/sqlite.py:61: sqlite3.IntegrityError: CHECK constraint failed
+E   sqlite3.IntegrityError: CHECK constraint failed: quantity BETWEEN 1 AND 5
+/home/alex/pharmacy-is/pharmacy/persistence/sqlite.py:61: sqlite3.IntegrityError: CHECK constraint failed
+FAILED tests/test_boundaries.py::test_quantity_outside_allowed_class[memory--1]
+FAILED tests/test_boundaries.py::test_quantity_outside_allowed_class[memory-0]
+FAILED tests/test_boundaries.py::test_quantity_outside_allowed_class[memory-6]
+FAILED tests/test_boundaries.py::test_quantity_outside_allowed_class[memory-7]
+FAILED tests/test_boundaries.py::test_quantity_outside_allowed_class[sqlite--1]
+FAILED tests/test_boundaries.py::test_quantity_outside_allowed_class[sqlite-0]
+FAILED tests/test_boundaries.py::test_quantity_outside_allowed_class[sqlite-6]
+FAILED tests/test_boundaries.py::test_quantity_outside_allowed_class[sqlite-7]
+FAILED tests/test_controllers.py::test_reserve_quantity_limits[memory-0] - As...
+FAILED tests/test_controllers.py::test_reserve_quantity_limits[memory-6] - Fa...
+FAILED tests/test_controllers.py::test_reserve_quantity_limits[sqlite-0] - As...
+FAILED tests/test_controllers.py::test_reserve_quantity_limits[sqlite-6] - sq...
+FAILED tests/test_domain.py::test_reservation_quantity_limits[0] - AssertionE...
+FAILED tests/test_domain.py::test_reservation_quantity_limits[6] - Failed: DI...
+14 failed, 392 passed in 1.80s

@@ -21,15 +21,15 @@ def reserve(ctx, quantity=1, drug="Парацетамол"):
 # --- Правило 1: кількість упаковок у резервуванні (R2.2) ---------------------------
 
 @pytest.mark.req("R2.2")
-@pytest.mark.parametrize("quantity", [1, 2, 4, 5])
+@pytest.mark.parametrize("quantity", [1, 2, 5, 6])
 def test_quantity_in_allowed_class(ctx, quantity):
     assert reserve(ctx, quantity).quantity == quantity
 
 
 @pytest.mark.req("R2.2")
-@pytest.mark.parametrize("quantity", [-1, 0, 6, 7])
+@pytest.mark.parametrize("quantity", [-1, 0, 7, 8])
 def test_quantity_outside_allowed_class(ctx, quantity):
-    with pytest.raises(Refused, match="від 1 до 5") as refusal:
+    with pytest.raises(Refused, match="від 1 до 6") as refusal:
         reserve(ctx, quantity)
     assert refusal.value.flow == "4a"
 
