@@ -31,15 +31,15 @@ title: Детальне проєктування класів із застос�
 
 Добір партії перенесено до `Pharmacy`, яка містить свої партії:
 
-<!-- py: ../pharmacy/domain/chain.py Pharmacy.pick_batch_for_sale -->
+<!-- py@lab6: ../pharmacy/domain/chain.py Pharmacy.pick_batch_for_sale -->
 
 Причину недійсності визначає сам рецепт:
 
-<!-- py: ../pharmacy/domain/prescription.py EPrescription.invalid_reason -->
+<!-- py@lab6: ../pharmacy/domain/prescription.py EPrescription.invalid_reason -->
 
 Контролер тепер лише координує кроки:
 
-<!-- py: ../pharmacy/controllers/prescription_sale_controller.py PrescriptionSaleController.sell -->
+<!-- py@lab6: ../pharmacy/controllers/prescription_sale_controller.py PrescriptionSaleController.sell -->
 
 ## 3. Завдання 2. Діаграма класів проєкту і контракти
 
@@ -57,11 +57,11 @@ title: Детальне проєктування класів із застос�
 
 Перевірка контрактів реалізована функціями `require`, `ensure`, `invariant` і декоратором:
 
-<!-- py: ../pharmacy/foundation/contracts.py keeps_invariant -->
+<!-- py@lab6: ../pharmacy/foundation/contracts.py keeps_invariant -->
 
 Приклад застосування в методі партії:
 
-<!-- py: ../pharmacy/domain/batch.py Batch.block -->
+<!-- py@lab6: ../pharmacy/domain/batch.py Batch.block -->
 
 Клас `ContractError` успадковує `DomainError`, тому всі попередні тести, що очікували
 `DomainError`, працюють і далі.
@@ -70,9 +70,9 @@ title: Детальне проєктування класів із застос�
 
 Для кожної передумови й інваріанта є тест на дотримання і тест на порушення:
 
-<!-- py: ../tests/test_contracts.py test_block_precondition_violation_changes_nothing -->
+<!-- py@lab6: ../tests/test_contracts.py test_block_precondition_violation_changes_nothing -->
 
-<!-- py: ../tests/test_contracts.py test_keeps_invariant_restores_state_after_violation -->
+<!-- py@lab6: ../tests/test_contracts.py test_keeps_invariant_restores_state_after_violation -->
 
 Запуск усіх тестів пакета:
 
@@ -84,12 +84,12 @@ title: Детальне проєктування класів із застос�
 
 <!-- md: strategy_spec.md -->
 
-<!-- py: ../pharmacy/domain/pricing.py ReimbursedPricing -->
+<!-- py@lab6: ../pharmacy/domain/pricing.py ReimbursedPricing -->
 
 Тест показує заміну поведінки: клієнтський код `checkout` однаковий для всіх стратегій, а новий
 клас `FixedPricing` працює без змін у `Sale`.
 
-<!-- py: ../tests/test_pricing.py test_policy_changes_amount_without_changing_client_code -->
+<!-- py@lab6: ../tests/test_pricing.py test_policy_changes_amount_without_changing_client_code -->
 
 ### 4.2 Програма metrics.py
 

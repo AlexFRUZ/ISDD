@@ -36,7 +36,7 @@ class ReservationController:
 
     def reserve(self, phone: str, pharmacy_number: str, trade_name: str, quantity: int,
                 recipe_number: str | None = None) -> ReservationResult:
-        """Контракт: lab6/contracts.md, метод 2."""
+        """Створення резервування описує контракт 2 у lab6/contracts.md."""
         now = self.clock()
         today = now.date()
         if not Reservation.is_allowed_quantity(quantity):

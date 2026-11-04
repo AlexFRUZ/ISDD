@@ -1,8 +1,0 @@
-      9 AssertionError: Regex pattern did not match.
-      9 E   AssertionError: Regex pattern did not match.
-      1 E   Failed: DID NOT RAISE DomainError
-      2 E   Failed: DID NOT RAISE Refused
-      2 E   sqlite3.IntegrityError: CHECK constraint failed: quantity BETWEEN 1 AND 5
-      1 Failed: DID NOT RAISE DomainError
-      2 Failed: DID NOT RAISE Refused
-      2 sqlite3.IntegrityError: CHECK constraint failed: quantity BETWEEN 1 AND 5

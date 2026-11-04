@@ -50,7 +50,7 @@ tests/                                   тести контролерів і д
 інтерфейс отримує від контролерів лише прості результати `ReservationResult` і `SaleResult`.
 Контролери отримують сховище й реєстр через конструктор:
 
-<!-- py: ../pharmacy/controllers/prescription_sale_controller.py PrescriptionSaleController.sell -->
+<!-- py@lab5: ../pharmacy/controllers/prescription_sale_controller.py PrescriptionSaleController.sell -->
 
 ### 3.3 Робота двох варіантів використання
 
@@ -67,7 +67,7 @@ tests/                                   тести контролерів і д
 Контролери тестуються без інтерфейсу користувача. Час передається як залежність, тому тести
 детерміновані.
 
-<!-- py: ../tests/test_controllers.py test_sale_registry_down_changes_nothing -->
+<!-- py@lab5: ../tests/test_controllers.py test_sale_registry_down_changes_nothing -->
 
 <!-- txt: results/pytest_tests.txt -->
 

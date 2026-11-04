@@ -34,7 +34,7 @@ class PrescriptionSaleController:
 
     def sell(self, pharmacist_number: str, recipe_number: str, quantity: int,
              payment: str = "картка") -> SaleResult:
-        """Контракт: lab6/contracts.md, метод 1."""
+        """Контракт: lab6/contracts.md, контракт 1."""
         require(quantity >= 1, "Кількість має бути додатною")
         now = self.clock()
         today = now.date()
