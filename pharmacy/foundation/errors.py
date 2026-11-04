@@ -15,3 +15,7 @@ class Refused(Exception):
     def __init__(self, flow: str, message: str) -> None:
         super().__init__(message)
         self.flow = flow
+
+
+class ContractError(DomainError):
+    """Порушення передумови, постумови або інваріанта."""

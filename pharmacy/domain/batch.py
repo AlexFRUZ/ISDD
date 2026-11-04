@@ -6,7 +6,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from pharmacy.foundation.errors import DomainError
+from pharmacy.foundation.contracts import ensure, invariant, keeps_invariant, require
 
 if TYPE_CHECKING:
     from pharmacy.domain.chain import Pharmacy
@@ -27,12 +27,14 @@ class Batch:
     reserved: int = 0
 
     def __post_init__(self) -> None:
-        if self.quantity < 0:
-            raise DomainError("Кількість у партії не може бути від'ємною")
-        if not 0 <= self.reserved <= self.quantity:
-            raise DomainError("Зарезервована кількість має бути в межах кількості партії")
+        self.check_invariant()
         self.drug.batches.append(self)
         self.pharmacy.batches.append(self)
+
+    def check_invariant(self) -> None:
+        invariant(self.quantity >= 0, "Кількість у партії не може бути від'ємною")
+        invariant(0 <= self.reserved <= self.quantity,
+                  "Зарезервована кількість має бути в межах кількості партії")
 
     @property
     def available(self) -> int:
@@ -44,21 +46,31 @@ class Batch:
     def has_shelf_life_for_reservation(self, today: date) -> bool:
         return self.expiry_date - today >= timedelta(days=MIN_SHELF_LIFE_DAYS)
 
+    def can_supply(self, quantity: int, today: date) -> bool:
+        return not self.is_expired(today) and self.available >= quantity
+
+    def can_be_reserved(self, quantity: int, today: date) -> bool:
+        return self.has_shelf_life_for_reservation(today) and self.available >= quantity
+
+    @keeps_invariant
     def block(self, quantity: int) -> None:
         """Блокує кількість під резервування, не змінюючи фізичний залишок."""
-        if quantity > self.available:
-            raise DomainError(f"Партія {self.series}: доступно лише {self.available} уп.")
+        require(quantity > 0, "Кількість має бути додатною")
+        require(quantity <= self.available, f"Партія {self.series}: доступно лише {self.available} уп.")
+        available_before = self.available
         self.reserved += quantity
+        ensure(self.available == available_before - quantity, "доступний залишок зменшено на кількість")
 
+    @keeps_invariant
     def unblock(self, quantity: int) -> None:
-        if quantity > self.reserved:
-            raise DomainError(f"Партія {self.series}: заблоковано лише {self.reserved} уп.")
+        require(quantity > 0, "Кількість має бути додатною")
+        require(quantity <= self.reserved, f"Партія {self.series}: заблоковано лише {self.reserved} уп.")
         self.reserved -= quantity
 
+    @keeps_invariant
     def write_off_sold(self, quantity: int, today: date) -> None:
         """Зменшує фізичний залишок під час продажу."""
-        if self.is_expired(today):
-            raise DomainError(f"Партія {self.series}: строк придатності минув")
-        if quantity > self.available:
-            raise DomainError(f"Партія {self.series}: доступно лише {self.available} уп.")
+        require(quantity > 0, "Кількість має бути додатною")
+        require(not self.is_expired(today), f"Партія {self.series}: строк придатності минув")
+        require(quantity <= self.available, f"Партія {self.series}: доступно лише {self.available} уп.")
         self.quantity -= quantity

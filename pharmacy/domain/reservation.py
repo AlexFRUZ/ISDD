@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pharmacy.domain.batch import MIN_SHELF_LIFE_DAYS
+from pharmacy.foundation.contracts import invariant, keeps_invariant, require
 from pharmacy.foundation.errors import DomainError, TransitionError
 
 if TYPE_CHECKING:
@@ -21,6 +22,7 @@ MAX_ACTIVE_RESERVATIONS = 3
 MIN_RESERVATION_QUANTITY = 1
 MAX_RESERVATION_QUANTITY = 5
 RESERVATION_HOURS = 24
+MAX_EXTENSIONS = 1
 TRANSITIONS_FILE = Path(__file__).with_name("transitions.csv")
 
 
@@ -55,28 +57,35 @@ class Reservation:
     customer_notified: bool = False
 
     def __post_init__(self) -> None:
-        if not MIN_RESERVATION_QUANTITY <= self.quantity <= MAX_RESERVATION_QUANTITY:
-            raise DomainError(
-                f"Кількість має бути від {MIN_RESERVATION_QUANTITY} до {MAX_RESERVATION_QUANTITY} упаковок"
-            )
-        if len(self.customer.active_reservations) >= MAX_ACTIVE_RESERVATIONS:
-            raise DomainError(f"Покупець уже має {MAX_ACTIVE_RESERVATIONS} активні резервування")
+        require(self.is_allowed_quantity(self.quantity),
+                f"Кількість має бути від {MIN_RESERVATION_QUANTITY} до {MAX_RESERVATION_QUANTITY} упаковок")
+        require(self.customer.can_reserve, f"Покупець уже має {MAX_ACTIVE_RESERVATIONS} активні резервування")
         today = self.created_at.date()
-        if self.batch.drug.requires_prescription and not self._prescription_matches(today):
-            raise DomainError("Для рецептурного препарату потрібен чинний е-рецепт")
-        if not self.batch.has_shelf_life_for_reservation(today):
-            raise DomainError(f"Залишковий строк партії менший за {MIN_SHELF_LIFE_DAYS} днів")
+        if self.batch.drug.requires_prescription:
+            require(self._prescription_matches(today), "Для рецептурного препарату потрібен чинний е-рецепт")
+        require(self.batch.has_shelf_life_for_reservation(today),
+                f"Залишковий строк партії менший за {MIN_SHELF_LIFE_DAYS} днів")
         self.expires_at = self.expires_at or self.created_at + timedelta(hours=RESERVATION_HOURS)
         self.customer.reservations.append(self)
+        self.check_invariant()
+
+    def check_invariant(self) -> None:
+        invariant(self.is_allowed_quantity(self.quantity), "Кількість резервування поза допустимими межами")
+        invariant(self.expires_at > self.created_at, "Строк дії має бути пізнішим за дату створення")
+        invariant(self.extensions <= MAX_EXTENSIONS, "Резервування можна продовжити лише один раз")
+
+    @staticmethod
+    def is_allowed_quantity(quantity: int) -> bool:
+        return MIN_RESERVATION_QUANTITY <= quantity <= MAX_RESERVATION_QUANTITY
 
     def _prescription_matches(self, today: date) -> bool:
-        recipe = self.prescription
-        return recipe is not None and recipe.is_valid(today) and recipe.inn == self.batch.drug.inn
+        return self.prescription is not None and self.prescription.matches(self.batch.drug.inn, today)
 
     @property
     def is_active(self) -> bool:
         return self.state in ACTIVE_RESERVATION_STATES
 
+    @keeps_invariant
     def fire(self, event: str, moment: datetime | None = None) -> None:
         """Обробляє подію за таблицею переходів; недопустима подія кидає виняток."""
         moment = moment or self.created_at

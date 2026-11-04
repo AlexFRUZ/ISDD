@@ -1,0 +1,144 @@
+@startuml dcd
+title Діаграма класів проєкту: UC7 і UC2
+skinparam classAttributeIconSize 0
+skinparam nodesep 45
+skinparam ranksep 70
+hide circle
+
+class PrescriptionSaleController <<controller>> {
+  +sell(pharmacist_number: str, recipe_number: str, quantity: int, payment: str): SaleResult
+}
+class ReservationController <<controller>> {
+  +reserve(phone: str, pharmacy_number: str, trade_name: str, quantity: int, recipe_number: str): ReservationResult
+}
+class Store <<interface>> {
+  +find_pharmacist(personnel_number: str): Pharmacist
+  +find_pharmacy(number: str): Pharmacy
+  +find_customer(phone: str): Customer
+  +save_customer(customer: Customer)
+  +save_reservation(reservation: Reservation)
+  +save_sale(sale: Sale)
+  +next_number(kind: str): int
+  +commit()
+}
+class PrescriptionRegistry <<interface>> {
+  +find(number: str): EPrescription
+  +redeem(recipe: EPrescription, quantity: int, today: date)
+}
+class Pharmacy {
+  -number: str
+  -address: str
+  +pick_batch_for_sale(inn: str, quantity: int, today: date): Batch
+  +pick_batch_for_reservation(trade_name: str, quantity: int, today: date): Batch
+}
+class PharmacyChain {
+  -name: str
+  +pharmacies_with(inn: str, quantity: int, today: date, excluding: Pharmacy): list
+}
+class Pharmacist {
+  -personnel_number: str
+  -full_name: str
+}
+class Batch {
+  -series: str
+  -expiry_date: date
+  -retail_price: Decimal
+  -quantity: int
+  -reserved: int
+  +can_supply(quantity: int, today: date): bool
+  +can_be_reserved(quantity: int, today: date): bool
+  +block(quantity: int)
+  +unblock(quantity: int)
+  +write_off_sold(quantity: int, today: date)
+}
+class Drug {
+  -trade_name: str
+  -inn: str
+}
+class PrescriptionDrug {
+  -control_group: str
+}
+class OtcDrug {
+  -check_limit: int
+}
+class EPrescription {
+  -number: str
+  -issued_on: date
+  -inn: str
+  -prescribed_quantity: int
+  -reimbursement_share: Decimal
+  +invalid_reason(today: date): str
+  +allows_quantity(quantity: int): bool
+  +matches(inn: str, today: date): bool
+  +pricing_policy(): PricingPolicy
+  +redeem(quantity: int, today: date)
+}
+class Customer {
+  -phone: str
+  -full_name: str
+  +create_reservation(code: str, now: datetime, quantity: int, batch: Batch, prescription: EPrescription): Reservation
+}
+class Reservation {
+  -code: str
+  -quantity: int
+  -expires_at: datetime
+  -state: ReservationState
+  +confirm()
+  +fire(event: str, moment: datetime)
+}
+class Sale {
+  -number: str
+  -sold_at: datetime
+  -total: Decimal
+  +add_line(batch: Batch, quantity: int): SaleLine
+  +complete()
+}
+class SaleLine {
+  -quantity: int
+  -unit_price: Decimal
+}
+class PricingPolicy <<strategy>> {
+  +amount_due(subtotal: Decimal): Decimal
+}
+class StandardPricing <<concrete strategy>> {
+  +amount_due(subtotal: Decimal): Decimal
+}
+class ReimbursedPricing <<concrete strategy>> {
+  -share: Decimal
+  +amount_due(subtotal: Decimal): Decimal
+}
+class LoyaltyPricing <<concrete strategy>> {
+  -percent: Decimal
+  +amount_due(subtotal: Decimal): Decimal
+}
+
+PrescriptionSaleController ..> Store : <<call>>
+PrescriptionSaleController ..> PrescriptionRegistry : <<call>>
+PrescriptionSaleController ..> Sale : <<create>>
+PrescriptionSaleController ..> Pharmacy : <<call>>
+PrescriptionSaleController ..> EPrescription : <<call>>
+ReservationController ..> Store : <<call>>
+ReservationController ..> PrescriptionRegistry : <<call>>
+ReservationController ..> Customer : <<call>>
+ReservationController ..> Pharmacy : <<call>>
+ReservationController ..> Reservation : <<call>>
+Customer ..> Reservation : <<create>>
+Sale ..> SaleLine : <<create>>
+
+PharmacyChain "1" o-- "1..*" Pharmacy
+Pharmacist "0..*" -- "1" Pharmacy
+Pharmacy "1" -- "0..*" Batch
+Batch "0..*" -- "1" Drug
+Drug <|-- PrescriptionDrug
+Drug <|-- OtcDrug
+Customer "1" -- "0..3" Reservation
+Reservation "0..*" -- "1" Batch
+Reservation "0..1" -- "0..1" EPrescription
+Sale "0..1" -- "0..1" EPrescription
+Sale "0..*" -- "1..*" Batch
+(Sale, Batch) .. SaleLine
+Sale --> "1" PricingPolicy
+PricingPolicy <|.. StandardPricing
+PricingPolicy <|.. ReimbursedPricing
+PricingPolicy <|.. LoyaltyPricing
+@enduml

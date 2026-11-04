@@ -7,7 +7,8 @@ from decimal import Decimal
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from pharmacy.foundation.errors import DomainError
+from pharmacy.domain.pricing import PricingPolicy, StandardPricing
+from pharmacy.foundation.contracts import ensure, invariant, keeps_invariant, require
 
 if TYPE_CHECKING:
     from pharmacy.domain.batch import Batch
@@ -31,22 +32,34 @@ class Sale:
     prescription: EPrescription | None = None
     total: Decimal = Decimal("0")
     lines: list[SaleLine] = field(default_factory=list, repr=False)
+    pricing: PricingPolicy = field(default_factory=StandardPricing, repr=False)
 
+    @property
+    def subtotal(self) -> Decimal:
+        return sum((line.amount for line in self.lines), Decimal("0"))
+
+    def check_invariant(self) -> None:
+        invariant(self.total >= 0, "Сума чека не може бути від'ємною")
+        invariant(self.total == self.pricing.amount_due(self.subtotal),
+                  "Сума чека має відповідати позиціям і способу ціноутворення")
+
+    @keeps_invariant
     def add_line(self, batch: Batch, quantity: int) -> SaleLine:
-        if any(line.batch is batch for line in self.lines):
-            raise DomainError(f"Партія {batch.series} вже є в чеку {self.number}")
-        today = self.sold_at.date()
-        if batch.drug.requires_prescription and self.prescription is None:
-            raise DomainError("Рецептурний препарат продається лише за е-рецептом")
-        batch.write_off_sold(quantity, today)
+        """Творець позиції: чек агрегує свої позиції."""
+        require(not any(line.batch is batch for line in self.lines),
+                f"Партія {batch.series} вже є в чеку {self.number}")
+        require(self.prescription is not None or not batch.drug.requires_prescription,
+                "Рецептурний препарат продається лише за е-рецептом")
+        lines_before = len(self.lines)
+        batch.write_off_sold(quantity, self.sold_at.date())
         line = SaleLine(quantity, batch.retail_price, self, batch)
         self.lines.append(line)
-        self.total += line.amount
+        self.total = self.pricing.amount_due(self.subtotal)
+        ensure(len(self.lines) == lines_before + 1, "до чека додано одну позицію")
         return line
 
     def complete(self) -> None:
-        if not self.lines:
-            raise DomainError("Чек має містити щонайменше одну позицію")
+        require(bool(self.lines), "Чек має містити щонайменше одну позицію")
 
 
 @dataclass(eq=False)
@@ -59,8 +72,7 @@ class SaleLine:
     batch: Batch
 
     def __post_init__(self) -> None:
-        if self.quantity < 1:
-            raise DomainError("Кількість у позиції має бути додатною")
+        invariant(self.quantity >= 1, "Кількість у позиції має бути додатною")
 
     @property
     def amount(self) -> Decimal:

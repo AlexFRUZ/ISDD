@@ -1,0 +1,4 @@
+   1 ../pharmacy/controllers/__init__.py
+  88 ../pharmacy/controllers/prescription_sale_controller.py
+  78 ../pharmacy/controllers/reservation_controller.py
+ 195 загалом

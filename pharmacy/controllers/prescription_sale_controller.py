@@ -1,12 +1,17 @@
-"""Контролер UC7 «Продати за е-рецептом» (ЛР 5)."""
+"""Контролер UC7 «Продати за е-рецептом».
+
+Контролер лише координує кроки варіанта використання: правила застосовують доменні
+класи (ЛР 6, шаблон Expert), а створення позицій виконує сам продаж (шаблон Creator).
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
 
-from pharmacy.domain import Batch, EPrescription, PaymentMethod, Pharmacy, PrescriptionState, Sale
+from pharmacy.domain import Batch, EPrescription, PaymentMethod, Pharmacist, PrescriptionState, Sale
 from pharmacy.foundation.clock import Clock, system_clock
+from pharmacy.foundation.contracts import ensure, require
 from pharmacy.foundation.errors import Refused
 from pharmacy.network.registry import PrescriptionRegistry, RegistryUnavailable
 from pharmacy.persistence.store import Store
@@ -29,55 +34,55 @@ class PrescriptionSaleController:
 
     def sell(self, pharmacist_number: str, recipe_number: str, quantity: int,
              payment: str = "картка") -> SaleResult:
+        """Контракт: lab6/contracts.md, метод 1."""
+        require(quantity >= 1, "Кількість має бути додатною")
         now = self.clock()
         today = now.date()
-        pharmacist = self.store.find_pharmacist(pharmacist_number)
-        if pharmacist is None:
-            raise Refused("пм", f"Фармацевта {pharmacist_number} не знайдено")
-        recipe = self._check_recipe(recipe_number, today)
-        if quantity > recipe.prescribed_quantity:
+        pharmacist = self._pharmacist(pharmacist_number)
+        recipe = self._valid_recipe(recipe_number, today)
+        if not recipe.allows_quantity(quantity):
             raise Refused("4a", f"У рецепті призначено лише {recipe.prescribed_quantity} уп.")
-        batch = self._pick_batch(pharmacist.pharmacy, recipe.inn, quantity, today)
+        batch = self._batch_for(pharmacist, recipe, quantity, today)
+        stock_before = batch.quantity
+        self._redeem(recipe, quantity, today)
+
+        sale = Sale(f"Ч-{self.store.next_number('sale')}", now, PaymentMethod(payment), pharmacist,
+                    prescription=recipe, pricing=recipe.pricing_policy())
+        sale.add_line(batch, quantity)
+        sale.complete()
+        self.store.save_sale(sale)
+        self.store.commit()
+
+        ensure(recipe.state is PrescriptionState.REDEEMED, "рецепт погашено")
+        ensure(batch.quantity == stock_before - quantity, "залишок партії зменшено")
+        return SaleResult(sale.number, batch.drug.trade_name, batch.series, quantity, sale.total)
+
+    def _pharmacist(self, number: str) -> Pharmacist:
+        pharmacist = self.store.find_pharmacist(number)
+        if pharmacist is None:
+            raise Refused("пм", f"Фармацевта {number} не знайдено")
+        return pharmacist
+
+    def _valid_recipe(self, number: str, today: date) -> EPrescription:
+        recipe = self.registry.find(number)
+        if recipe is None:
+            raise Refused("3a", f"Рецепт {number} не знайдено в реєстрі")
+        reason = recipe.invalid_reason(today)
+        if reason:
+            raise Refused("3b", f"Рецепт {number} недійсний: {reason}")
+        return recipe
+
+    def _batch_for(self, pharmacist: Pharmacist, recipe: EPrescription, quantity: int, today: date) -> Batch:
+        here = pharmacist.pharmacy
+        batch = here.pick_batch_for_sale(recipe.inn, quantity, today)
+        if batch is None:
+            others = self.store.chain().pharmacies_with(recipe.inn, quantity, today, excluding=here)
+            hint = f" Препарат є в аптеках: {', '.join(p.number for p in others)}." if others else ""
+            raise Refused("5a", f"В аптеці немає придатної партії.{hint}")
+        return batch
+
+    def _redeem(self, recipe: EPrescription, quantity: int, today: date) -> None:
         try:
             self.registry.redeem(recipe, quantity, today)
         except RegistryUnavailable:
             raise Refused("6a", "Реєстр е-рецептів недоступний. Продаж не оформлено.") from None
-        sale = self._create_sale(pharmacist, recipe, batch, quantity, now, PaymentMethod(payment))
-        self.store.save_sale(sale)
-        self.store.commit()
-        return SaleResult(sale.number, batch.drug.trade_name, batch.series, quantity, sale.total)
-
-    def _check_recipe(self, number: str, today: date) -> EPrescription:
-        recipe = self.registry.find(number)
-        if recipe is None:
-            raise Refused("3a", f"Рецепт {number} не знайдено в реєстрі")
-        if not recipe.is_valid(today):
-            if recipe.state is PrescriptionState.ACTIVE:
-                reason = "минув строк дії"
-            else:
-                reason = f"стан «{recipe.state.value}»"
-            raise Refused("3b", f"Рецепт {number} недійсний: {reason}")
-        return recipe
-
-    def _pick_batch(self, pharmacy: Pharmacy, inn: str, quantity: int, today: date) -> Batch:
-        here = self._suitable(pharmacy, inn, quantity, today)
-        if here:
-            return min(here, key=lambda b: b.expiry_date)
-        others = [p.number for p in self.store.chain().pharmacies
-                  if p is not pharmacy and self._suitable(p, inn, quantity, today)]
-        hint = f" Препарат є в аптеках: {', '.join(others)}." if others else ""
-        raise Refused("5a", f"В аптеці немає придатної партії.{hint}")
-
-    @staticmethod
-    def _suitable(pharmacy: Pharmacy, inn: str, quantity: int, today: date) -> list[Batch]:
-        return [b for b in pharmacy.batches
-                if b.drug.inn == inn and not b.is_expired(today) and b.available >= quantity]
-
-    def _create_sale(self, pharmacist, recipe: EPrescription, batch: Batch, quantity: int,
-                     now: datetime, payment: PaymentMethod) -> Sale:
-        number = f"Ч-{self.store.next_number('sale')}"
-        sale = Sale(number, now, payment, pharmacist, prescription=recipe)
-        sale.add_line(batch, quantity)
-        sale.total = (sale.total * (Decimal("1") - recipe.reimbursement_share)).quantize(Decimal("0.01"))
-        sale.complete()
-        return sale

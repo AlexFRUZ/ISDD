@@ -1,4 +1,8 @@
-"""Контролер UC2 «Зарезервувати препарат» (ЛР 5)."""
+"""Контролер UC2 «Зарезервувати препарат».
+
+Контролер лише координує кроки: партію добирає аптека, ліміт перевіряє покупець,
+а резервування створює покупець, який його містить (шаблони Expert і Creator).
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -9,6 +13,7 @@ from pharmacy.domain import (
     Batch, Customer, EPrescription, Reservation, ReservationState,
 )
 from pharmacy.foundation.clock import Clock, system_clock
+from pharmacy.foundation.contracts import ensure
 from pharmacy.foundation.errors import Refused
 from pharmacy.network.registry import PrescriptionRegistry
 from pharmacy.persistence.store import Store
@@ -31,43 +36,43 @@ class ReservationController:
 
     def reserve(self, phone: str, pharmacy_number: str, trade_name: str, quantity: int,
                 recipe_number: str | None = None) -> ReservationResult:
+        """Контракт: lab6/contracts.md, метод 2."""
         now = self.clock()
         today = now.date()
-        if not MIN_RESERVATION_QUANTITY <= quantity <= MAX_RESERVATION_QUANTITY:
+        if not Reservation.is_allowed_quantity(quantity):
             raise Refused("4a", f"Можна резервувати від {MIN_RESERVATION_QUANTITY} "
                                 f"до {MAX_RESERVATION_QUANTITY} упаковок")
-        customer = self._customer(phone)
-        if len(customer.active_reservations) >= MAX_ACTIVE_RESERVATIONS:
+        customer = self.store.find_customer(phone) or Customer(phone, "")
+        if not customer.can_reserve:
             raise Refused("3a", f"Покупець уже має {MAX_ACTIVE_RESERVATIONS} активні резервування")
-        batch = self._pick_batch(pharmacy_number, trade_name, quantity, today)
-        recipe = self._check_recipe(batch, recipe_number, today)
+        batch = self._batch_for(pharmacy_number, trade_name, quantity, today)
+        recipe = self._recipe_for(batch, recipe_number, today)
+        available_before = batch.available
 
         code = f"R-{self.store.next_number('reservation')}"
-        reservation = Reservation(code, now, quantity, customer, batch, recipe)
+        reservation = customer.create_reservation(code, now, quantity, batch, recipe)
         reservation.confirm()
-        if reservation.state is ReservationState.CANCELLED:
-            raise Refused("5a", f"Партія {batch.series}: залишку вже недостатньо")
         self.store.save_customer(customer)
         self.store.save_reservation(reservation)
         self.store.commit()
+
+        ensure(reservation.state is ReservationState.CONFIRMED, "резервування підтверджено")
+        ensure(batch.available == available_before - quantity, "доступний залишок зменшено")
         return ReservationResult(code, batch.drug.trade_name, batch.series, quantity, reservation.expires_at)
 
-    def _customer(self, phone: str) -> Customer:
-        return self.store.find_customer(phone) or Customer(phone, "")
-
-    def _pick_batch(self, pharmacy_number: str, trade_name: str, quantity: int, today: date) -> Batch:
-        suitable = [b for b in self.store.find_batches(pharmacy_number, trade_name)
-                    if b.has_shelf_life_for_reservation(today) and b.available >= quantity]
-        if not suitable:
+    def _batch_for(self, pharmacy_number: str, trade_name: str, quantity: int, today: date) -> Batch:
+        pharmacy = self.store.find_pharmacy(pharmacy_number)
+        batch = pharmacy.pick_batch_for_reservation(trade_name, quantity, today) if pharmacy else None
+        if batch is None:
             raise Refused("5a", f"В аптеці {pharmacy_number} немає придатної партії препарату {trade_name}")
-        return min(suitable, key=lambda b: b.expiry_date)
+        return batch
 
-    def _check_recipe(self, batch: Batch, number: str | None, today: date) -> EPrescription | None:
+    def _recipe_for(self, batch: Batch, number: str | None, today: date) -> EPrescription | None:
         if not batch.drug.requires_prescription:
             return None
         if number is None:
             raise Refused("6a", "Для рецептурного препарату потрібен номер е-рецепта")
         recipe = self.registry.find(number)
-        if recipe is None or not recipe.is_valid(today) or recipe.inn != batch.drug.inn:
+        if recipe is None or not recipe.matches(batch.drug.inn, today):
             raise Refused("6b", f"Рецепт {number} не підходить для цього препарату")
         return recipe

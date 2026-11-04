@@ -10,7 +10,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Protocol
 
-from pharmacy.domain import Batch, Customer, EPrescription, Pharmacist, Pharmacy, PharmacyChain, Reservation, Sale
+from pharmacy.domain import Customer, EPrescription, Pharmacist, Pharmacy, PharmacyChain, Reservation, Sale
 
 
 class Store(Protocol):
@@ -21,7 +21,6 @@ class Store(Protocol):
     def find_pharmacist(self, personnel_number: str) -> Pharmacist | None: ...
     def find_customer(self, phone: str) -> Customer | None: ...
     def save_customer(self, customer: Customer) -> None: ...
-    def find_batches(self, pharmacy_number: str, trade_name: str) -> list[Batch]: ...
     def save_reservation(self, reservation: Reservation) -> None: ...
     def find_reservation(self, code: str) -> Reservation | None: ...
     def save_sale(self, sale: Sale) -> None: ...
@@ -63,12 +62,6 @@ class MemoryStore:
 
     def save_customer(self, customer: Customer) -> None:
         self.customers[customer.phone] = customer
-
-    def find_batches(self, pharmacy_number: str, trade_name: str) -> list[Batch]:
-        pharmacy = self.find_pharmacy(pharmacy_number)
-        if pharmacy is None:
-            return []
-        return [b for b in pharmacy.batches if b.drug.trade_name == trade_name]
 
     def save_reservation(self, reservation: Reservation) -> None:
         self.reservations[reservation.code] = reservation
