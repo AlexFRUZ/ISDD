@@ -4,35 +4,48 @@
 асоціації є посиланнями або колекціями, а асоціативний клас «Позиція продажу» має
 посилання на обидва кінці зв'язку. Кратності й інваріанти перевіряють методи класів.
 Поточну дату передають явно, щоб правила можна було тестувати детерміновано.
+
+ЛР 4: клас Reservation отримав табличну машину станів. Таблицю завантажено з того
+самого файлу transitions.csv, який перевіряє fsm_check.py, тому модель і код не
+розходяться. Обмеження «продовжити один раз» виражено самою таблицею: зі стану
+«Продовжене» подію «продовжити» не визначено.
 """
 from __future__ import annotations
 
+import csv
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from enum import Enum
+from pathlib import Path
 
 MAX_ACTIVE_RESERVATIONS = 3
 MIN_RESERVATION_QUANTITY = 1
 MAX_RESERVATION_QUANTITY = 5
 RESERVATION_HOURS = 24
-MAX_EXTENSIONS = 1
 PRESCRIPTION_VALID_DAYS = 30
 MIN_SHELF_LIFE_DAYS = 30
+TRANSITIONS_FILE = Path(__file__).resolve().parent.parent / "lab4" / "transitions.csv"
 
 
 class DomainError(Exception):
     """Порушення кратності або інваріанта предметної області."""
 
 
+class TransitionError(DomainError):
+    """Подія недопустима в поточному стані або не виконано умову переходу."""
+
+
 class ReservationState(Enum):
-    NEW = "нове"
-    CONFIRMED = "підтверджене"
-    READY = "готове"
-    EXTENDED = "продовжене"
-    ISSUED = "видане"
-    CANCELLED = "скасоване"
-    EXPIRED = "прострочене"
+    NEW = "Нове"
+    CONFIRMED = "Підтверджене"
+    READY = "Готове"
+    EXTENDED = "Продовжене"
+    ISSUED = "Видане"
+    CANCELLED = "Скасоване"
+    EXPIRED = "Прострочене"
+    ARCHIVED = "[*]"
 
 
 ACTIVE_RESERVATION_STATES = {
@@ -245,6 +258,7 @@ class Reservation:
     expires_at: datetime | None = None
     extensions: int = 0
     state: ReservationState = ReservationState.NEW
+    customer_notified: bool = False
 
     def __post_init__(self) -> None:
         if not MIN_RESERVATION_QUANTITY <= self.quantity <= MAX_RESERVATION_QUANTITY:
@@ -258,7 +272,6 @@ class Reservation:
             raise DomainError("Для рецептурного препарату потрібен чинний е-рецепт")
         if not self.batch.has_shelf_life_for_reservation(today):
             raise DomainError(f"Залишковий строк партії менший за {MIN_SHELF_LIFE_DAYS} днів")
-        self.batch.block(self.quantity)
         self.expires_at = self.expires_at or self.created_at + timedelta(hours=RESERVATION_HOURS)
         self.customer.reservations.append(self)
 
@@ -270,18 +283,94 @@ class Reservation:
     def is_active(self) -> bool:
         return self.state in ACTIVE_RESERVATION_STATES
 
+    def fire(self, event: str, moment: datetime | None = None) -> None:
+        """Обробляє подію за таблицею переходів; недопустима подія кидає виняток."""
+        moment = moment or self.created_at
+        transitions = TRANSITIONS.get((self.state.value, event))
+        if not transitions:
+            raise TransitionError(f"Подія «{event}» недопустима у стані «{self.state.value}»")
+        for transition in transitions:
+            if GUARDS[transition.guard](self, moment):
+                ACTIONS[transition.action](self, moment)
+                self.state = ReservationState(transition.next)
+                return
+        raise TransitionError(f"Подія «{event}»: не виконано умову переходу зі стану «{self.state.value}»")
+
+    def confirm(self) -> None:
+        self.fire("підтвердити")
+
+    def prepare(self) -> None:
+        self.fire("зібрати")
+
+    def issue(self, moment: datetime) -> None:
+        self.fire("видати", moment)
+
     def extend(self) -> None:
-        if self.extensions >= MAX_EXTENSIONS:
-            raise DomainError("Резервування можна продовжити лише один раз")
-        self.extensions += 1
-        self.expires_at += timedelta(hours=RESERVATION_HOURS)
-        self.state = ReservationState.EXTENDED
+        self.fire("продовжити")
 
     def cancel(self) -> None:
-        if not self.is_active:
-            raise DomainError(f"Резервування {self.code} уже не активне")
+        self.fire("скасувати")
+
+    def expire(self, moment: datetime) -> None:
+        self.fire("настав строк", moment)
+
+    def archive(self) -> None:
+        self.fire("архівувати")
+
+    def _block_stock(self, _moment: datetime) -> None:
+        self.batch.block(self.quantity)
+
+    def _release_stock(self, _moment: datetime) -> None:
         self.batch.unblock(self.quantity)
-        self.state = ReservationState.CANCELLED
+
+    def _write_off_stock(self, moment: datetime) -> None:
+        self.batch.unblock(self.quantity)
+        self.batch.write_off_sold(self.quantity, moment.date())
+
+    def _notify_customer(self, _moment: datetime) -> None:
+        self.customer_notified = True
+
+    def _add_extension(self, _moment: datetime) -> None:
+        self.extensions += 1
+        self.expires_at += timedelta(hours=RESERVATION_HOURS)
+
+
+GUARDS = {
+    "": lambda r, moment: True,
+    "є залишок": lambda r, moment: r.batch.available >= r.quantity,
+    "немає залишку": lambda r, moment: r.batch.available < r.quantity,
+    "строк дії минув": lambda r, moment: moment > r.expires_at,
+    "строк дії не минув": lambda r, moment: moment <= r.expires_at,
+}
+ACTIONS = {
+    "": lambda r, moment: None,
+    "заблокувати залишок": Reservation._block_stock,
+    "повернути залишок": Reservation._release_stock,
+    "списати залишок": Reservation._write_off_stock,
+    "сповістити покупця": Reservation._notify_customer,
+    "додати 24 години": Reservation._add_extension,
+}
+
+
+@dataclass(frozen=True)
+class Transition:
+    guard: str
+    action: str
+    next: str
+
+
+def load_transitions(path: Path = TRANSITIONS_FILE) -> dict[tuple[str, str], list[Transition]]:
+    """Завантажує таблицю переходів. Невідома умова чи дія є помилкою моделі."""
+    table: dict[tuple[str, str], list[Transition]] = defaultdict(list)
+    with open(path, encoding="utf-8", newline="") as stream:
+        for row in csv.DictReader(stream, delimiter=";"):
+            if row["guard"] not in GUARDS or row["action"] not in ACTIONS:
+                raise DomainError(f"Таблиця переходів: невідомі умова чи дія в рядку {row}")
+            table[(row["state"], row["event"])].append(Transition(row["guard"], row["action"], row["next"]))
+    return dict(table)
+
+
+TRANSITIONS = load_transitions()
 
 
 @dataclass(eq=False)

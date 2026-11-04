@@ -1,0 +1,118 @@
+@startuml domain_ops
+title Доменні класи з операціями ІС «Мережа аптек»
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam nodesep 75
+skinparam ranksep 130
+hide circle
+left to right direction
+
+class "Мережа аптек" as PharmacyChain {
+  назва мережі : String
+  код ЄДРПОУ : String
+}
+class "Аптека" as Pharmacy {
+  номер аптеки : String
+  адреса : String
+  місто : String
+  телефон : String
+  графік роботи : String
+}
+class "Фармацевт" as Pharmacist {
+  табельний номер : String
+  ПІБ фармацевта : String
+}
+class "Препарат" as Drug {
+  торгова назва : String
+  міжнародна непатентована назва : String
+  форма випуску : String
+  дозування : String
+  виробник : String
+}
+class "Рецептурний препарат" as PrescriptionDrug {
+  група контролю : String
+}
+class "Безрецептурний препарат" as OtcDrug {
+  ліміт на чек : int
+}
+class "Партія" as Batch {
+  серія : String
+  строк придатності : Date
+  закупівельна ціна : Decimal
+  роздрібна ціна : Decimal
+  кількість у партії : int
+  зарезервована кількість : int
+  --
+  зменшує залишок(кількість)
+  перевіряє придатність(дата, кількість)
+  блокує кількість(кількість)
+}
+class "Постачальник" as Supplier {
+  назва постачальника : String
+  телефон постачальника : String
+}
+class "Поставка" as Delivery {
+  номер накладної : String
+  дата поставки : Date
+}
+class "Покупець" as Customer {
+  номер телефону : String
+  ПІБ покупця : String
+  --
+  перевіряє ліміт резервувань()
+}
+class "Резервування" as Reservation {
+  код резервування : String
+  дата створення : DateTime
+  строк дії резервування : DateTime
+  кількість упаковок : int
+  кількість продовжень : int
+  стан резервування : String
+  --
+  підтверджує резервування()
+}
+class "Лікар" as Doctor {
+  ПІБ лікаря : String
+  спеціальність : String
+}
+class "Електронний рецепт" as EPrescription {
+  номер рецепта : String
+  дата виписки : Date
+  МНН рецепта : String
+  призначена кількість : int
+  частка реімбурсації : Decimal
+  стан рецепта : String
+  --
+  перевіряє кількість(кількість)
+}
+class "Продаж" as Sale {
+  номер чека : String
+  дата продажу : DateTime
+  спосіб оплати : String
+  сума чека : Decimal
+  --
+  додає позицію(партія, кількість)
+}
+class "Позиція продажу" as SaleLine {
+  кількість у позиції : int
+  ціна за упаковку : Decimal
+}
+
+PharmacyChain "1" o-- "1..*" Pharmacy : складається з >
+Pharmacist "0..*" -- "1" Pharmacy : працює в >
+Drug <|-- PrescriptionDrug
+Drug <|-- OtcDrug
+Supplier "1" -- "0..*" Delivery : виконує >
+Delivery "1" o-- "1..*" Batch : містить >
+Batch "0..*" -- "1" Drug : містить >
+Pharmacy "1" -- "0..*" Batch : зберігає >
+Customer "1" -- "0..3" Reservation : створює >
+Reservation "0..*" -- "1" Batch : блокує >
+Doctor "1" -- "0..*" EPrescription : виписує >
+EPrescription "0..1" -- "0..1" Reservation : підтверджує >
+Pharmacist "1" -- "0..*" Sale : оформлює >
+Sale "0..*" -- "1..*" Batch
+(Sale, Batch) .. SaleLine
+Sale "0..1" -- "0..1" EPrescription : погашає >
+Customer "0..1" -- "0..*" Sale : здійснює >
+@enduml

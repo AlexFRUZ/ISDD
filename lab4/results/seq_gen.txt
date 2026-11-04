@@ -1,0 +1,15 @@
+$ python seq_gen.py uc7_sale.csv -o diagrams/uc7_sale.puml
+Учасників: 9, повідомлень: 16, фрагментів: 1
+Перевірку правила Kung пройдено
+Збережено: diagrams/uc7_sale.puml
+
+$ python seq_gen.py uc2_reserve.csv -o diagrams/uc2_reserve.puml
+Учасників: 6, повідомлень: 15, фрагментів: 2
+Перевірку правила Kung пройдено
+Збережено: diagrams/uc2_reserve.puml
+
+$ python seq_gen.py uc7_broken.csv
+Рядок 3: суб'єкт "Реєстр" не є об'єктом дії рядка 2
+         і не був суб'єктом попередніх рядків
+Знайдено порушень: 1
+(код завершення 1)

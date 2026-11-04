@@ -52,7 +52,9 @@ def pharmacist(pharmacy):
 
 
 def reserve(customer, batch, code="R-1", quantity=1, prescription=None):
-    return d.Reservation(code, NOW, quantity, customer, batch, prescription)
+    reservation = d.Reservation(code, NOW, quantity, customer, batch, prescription)
+    reservation.confirm()
+    return reservation
 
 
 # --- Нормальна поведінка ---------------------------------------------------------
@@ -72,6 +74,7 @@ def test_cancel_returns_stock(customer, batch):
 
 def test_extend_adds_24_hours(customer, batch):
     reservation = reserve(customer, batch)
+    reservation.prepare()
     reservation.extend()
     assert reservation.expires_at == NOW + timedelta(hours=48)
     assert reservation.state is d.ReservationState.EXTENDED
@@ -122,8 +125,13 @@ def test_reservation_quantity_limits(customer, batch, quantity):
 
 def test_cannot_reserve_more_than_available(customer, otc_drug, pharmacy):
     small = d.Batch("S-1", FAR_EXPIRY, Decimal("1"), Decimal("2"), 2, otc_drug, pharmacy)
-    with pytest.raises(d.DomainError, match="доступно лише 2"):
-        reserve(customer, small, quantity=3)
+    reservation = reserve(customer, small, quantity=3)
+    assert reservation.state is d.ReservationState.CANCELLED and small.available == 2
+
+
+def test_batch_cannot_block_more_than_available(batch):
+    with pytest.raises(d.DomainError, match="доступно лише 20"):
+        batch.block(21)
 
 
 def test_rx_drug_needs_prescription_for_reservation(customer, rx_batch):
@@ -145,8 +153,9 @@ def test_batch_with_short_shelf_life_cannot_be_reserved(customer, otc_drug, phar
 
 def test_only_one_extension_allowed(customer, batch):
     reservation = reserve(customer, batch)
+    reservation.prepare()
     reservation.extend()
-    with pytest.raises(d.DomainError, match="лише один раз"):
+    with pytest.raises(d.DomainError, match="недопустима"):
         reservation.extend()
 
 
