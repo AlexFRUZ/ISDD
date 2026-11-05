@@ -1,0 +1,56 @@
+@startuml dcd_sales
+title Фрагмент діаграми класів проєкту: підсистема «Продаж»
+skinparam classAttributeIconSize 0
+hide circle
+
+class ReservedSaleController <<controller>> {
+  +issue(pharmacist_number, code, payment): SaleResult
+}
+class PrescriptionSaleController <<controller>> {
+  +sell(pharmacist_number, recipe_number, quantity, payment): SaleResult
+}
+class OtcSaleController <<controller>> {
+  +sell(pharmacist_number, trade_name, quantity, payment): SaleResult
+}
+class PrescriptionVerificationService <<service>> {
+  +verify(number, today): EPrescription
+  +verified_for(number, inn, today): EPrescription
+  +redeem(recipe, quantity, today)
+}
+class ReservationProvider <<interface>> {
+  +find(code): Reservation
+  +complete_issue(reservation, moment)
+}
+class PrescriptionRegistry <<interface>> {
+  +find(number): EPrescription
+  +redeem(recipe, quantity, today)
+}
+class Sale {
+  +add_line(batch, quantity): SaleLine
+  +add_reserved_line(reservation): SaleLine
+  +complete()
+}
+class SaleLine
+class EPrescription {
+  +invalid_reason(today): str
+  +allows_quantity(quantity): bool
+  +redeem(quantity, today)
+}
+class Reservation
+class Batch
+class Pharmacist
+
+ReservedSaleController ..> ReservationProvider
+ReservedSaleController ..> PrescriptionVerificationService
+ReservedSaleController ..> Sale : <<create>>
+PrescriptionSaleController ..> PrescriptionVerificationService
+PrescriptionSaleController ..> Sale : <<create>>
+OtcSaleController ..> Sale : <<create>>
+PrescriptionVerificationService ..> PrescriptionRegistry
+PrescriptionVerificationService ..> EPrescription
+Sale "1" *-- "1..*" SaleLine
+SaleLine "*" --> "1" Batch
+Sale "*" --> "1" Pharmacist
+Sale "0..*" --> "0..1" EPrescription
+ReservationProvider ..> Reservation
+@enduml

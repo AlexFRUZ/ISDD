@@ -70,3 +70,25 @@ def test_prepare_with_sms_down(run):
 def test_expire_command(run):
     code, out = run("expire")
     assert code == 0 and out.startswith("Анульовано резервувань: 0")
+
+
+def test_issue_reserved_sale_command(run):
+    run("reserve", "--phone", "+380671112233", "--pharmacy", "А-01", "--drug", "Парацетамол")
+    run("prepare", "--pharmacist", "Ф-7", "--code", "R-6")
+    code, out = run("issue", "--pharmacist", "Ф-7", "--code", "R-6")
+    assert code == 0 and "Продаж Ч-6 оформлено" in out and "35.50 грн" in out
+
+
+def test_otc_sale_command(run):
+    code, out = run("sell-otc", "--pharmacist", "Ф-7", "--drug", "Парацетамол", "--qty", "2")
+    assert code == 0 and "PA-0" in out and "60.00 грн" in out
+
+
+def test_verify_recipe_command(run):
+    code, out = run("verify-recipe", "--recipe", "E-100")
+    assert code == 0 and "Рецепт E-100 чинний" in out
+
+
+def test_verify_recipe_registry_down(run):
+    code, out = run("verify-recipe", "--recipe", "E-100", "--registry-down")
+    assert code == 1 and "потік 2a" in out

@@ -1,0 +1,8 @@
+Клас                           метод. атриб.  DIT  fan-in  fan-out  рішень
+SaleResult                          0      5    0       3        0       0
+OtcSaleController                   1      2    0       0        1       4
+PrescriptionSaleController          3      3    0       0        2       7
+ReservedSaleController              1      4    0       0        2       8
+PrescriptionVerificationService      3      1    0       2        0       6
+Попереджень немає
+Класів: 5. Середній fan-out: 1.0

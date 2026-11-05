@@ -65,7 +65,7 @@ use_cases:
     name: Видати резерв
     actors: [Фармацевт]
     subsystem: Продаж
-    requirements: [R5, R8, N5]
+    requirements: [R5, R5.1, R5.2, R5.3, R8, N5]
     tucbw: фармацевт вводить код резервування, який назвав покупець
     tucew: покупець отримує препарат і чек
     effort: 2
@@ -84,7 +84,7 @@ use_cases:
     name: Продати безрецептурний препарат
     actors: [Фармацевт]
     subsystem: Продаж
-    requirements: [R7, R7.1, R8, R8.1, N2, N5]
+    requirements: [R7, R7.1, R7.2, R8, R8.1, N2, N5]
     tucbw: фармацевт обирає препарат і кількість
     tucew: покупець отримує препарат і чек
     effort: 2

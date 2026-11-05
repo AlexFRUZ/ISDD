@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from pharmacy.domain.chain import Pharmacist
     from pharmacy.domain.customer import Customer
     from pharmacy.domain.prescription import EPrescription
+    from pharmacy.domain.reservation import Reservation
 
 
 class PaymentMethod(Enum):
@@ -54,6 +55,23 @@ class Sale:
         self.lines.append(line)
         self.total = self.pricing.amount_due(self.subtotal)
         ensure(len(self.lines) == lines_before + 1, "до чека додано одну позицію")
+        return line
+
+    @keeps_invariant
+    def add_reserved_line(self, reservation: Reservation) -> SaleLine:
+        """Додає виданий резерв без повторного списання залишку."""
+        from pharmacy.domain.reservation import ReservationState
+
+        require(reservation.state is ReservationState.ISSUED,
+                f"Резервування {reservation.code} ще не видане")
+        batch = reservation.batch
+        require(not any(line.batch is batch for line in self.lines),
+                f"Партія {batch.series} вже є в чеку {self.number}")
+        require(self.prescription is not None or not batch.drug.requires_prescription,
+                "Рецептурний препарат продається лише за е-рецептом")
+        line = SaleLine(reservation.quantity, batch.retail_price, self, batch)
+        self.lines.append(line)
+        self.total = self.pricing.amount_due(self.subtotal)
         return line
 
     def complete(self) -> None:

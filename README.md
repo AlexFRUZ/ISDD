@@ -26,13 +26,14 @@
 lab1/ ... lab7/   артефакти, програми-інструменти й тести кожної роботи
 pharmacy/         застосунок, створений у ЛР 5 і розвинений у ЛР 6–7
   ui/             консольний інтерфейс
-  controllers/    контролери варіантів використання UC2 і UC7
+  controllers/    окремі пакети підсистем «Резервування» і «Продаж»
   network/        шлюз до реєстру е-рецептів
   persistence/    репозиторії (пам'ять і SQLite), schema.sql, seed.sql
   domain/         доменні класи, машина станів, ціноутворення
   foundation/     винятки, контракти, час
 tests/            тести застосунку
 iz/reservation/   індивідуальне завдання: підсистема «Резервування» (Гладун Олександр)
+iz/sales/         індивідуальне завдання: підсистема «Продаж» (UC6–UC9)
 tools/            рендеринг діаграм
 ```
 
@@ -53,12 +54,16 @@ python -m venv .venv
 
 ```bash
 .venv/bin/python -m pharmacy.ui.cli seed
+
+# UC2 -> UC4 -> UC6
 .venv/bin/python -m pharmacy.ui.cli reserve --phone +380671112233 --pharmacy А-01 --drug Парацетамол --qty 2
-.venv/bin/python -m pharmacy.ui.cli sell --pharmacist Ф-7 --recipe E-100 --qty 1
 .venv/bin/python -m pharmacy.ui.cli prepare --pharmacist Ф-7 --code R-6
-.venv/bin/python -m pharmacy.ui.cli extend --pharmacist Ф-7 --code R-6
-.venv/bin/python -m pharmacy.ui.cli cancel --phone +380671112233 --code R-6
-.venv/bin/python -m pharmacy.ui.cli expire
+.venv/bin/python -m pharmacy.ui.cli issue --pharmacist Ф-7 --code R-6
+
+# UC7, UC8, UC9
+.venv/bin/python -m pharmacy.ui.cli sell --pharmacist Ф-7 --recipe E-100 --qty 1
+.venv/bin/python -m pharmacy.ui.cli sell-otc --pharmacist Ф-7 --drug Парацетамол --qty 2
+.venv/bin/python -m pharmacy.ui.cli verify-recipe --recipe E-101
 ```
 
 Покриття коду:

@@ -1,0 +1,9 @@
+Name                                                         Stmts   Miss Branch BrPart  Cover
+pharmacy/controllers/sales/__init__.py                           5      0      0      0   100%
+pharmacy/controllers/sales/common.py                            18      0      2      0   100%
+pharmacy/controllers/sales/otc_sale_controller.py               34      1      8      1    95%
+pharmacy/controllers/sales/prescription_sale_controller.py      50      0      6      0   100%
+pharmacy/controllers/sales/reserved_sale_controller.py          46      1     16      1    97%
+pharmacy/controllers/sales/verification.py                      32      2      6      0    95%
+TOTAL                                                          185      4     38      2    97%
+503 passed

@@ -19,3 +19,4 @@ forbidden_modules:
   controllers: [sqlite3, argparse]
 subsystems:
   reservation: []
+  sales: [pharmacy.controllers.reservation.interface]

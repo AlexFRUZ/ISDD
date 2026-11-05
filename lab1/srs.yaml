@@ -162,22 +162,53 @@ requirements:
     priority: 3
     source: інтерв'ю із завідувачем аптеки
   - id: R5
+    subsystem: Продаж
     type: functional
     text: ІС повинна дозволяти фармацевту видавати зарезервований препарат за кодом резервування.
     priority: 1
     source: US-05
+  - id: R5.1
+    subsystem: Продаж
+    parent: R5
+    type: functional
+    text: >
+      ІС повинна дозволяти видачу лише готового або продовженого резервування,
+      строк дії якого не минув.
+    priority: 1
+    source: ІЗ, етап 1
+  - id: R5.2
+    subsystem: Продаж
+    parent: R5
+    type: functional
+    text: >
+      ІС повинна в одній транзакції створювати чек, переводити резервування
+      у стан «Видане» і списувати зарезервовану кількість.
+    priority: 1
+    source: ІЗ, етап 1
+  - id: R5.3
+    subsystem: Продаж
+    parent: R5
+    type: functional
+    text: >
+      ІС повинна дозволяти видачу резерву лише фармацевту аптеки,
+      в якій зберігається резерв.
+    priority: 1
+    source: ІЗ, етап 1
   - id: R6
+    subsystem: Продаж
     type: functional
     text: ІС повинна дозволяти фармацевту продавати препарат за електронним рецептом.
     priority: 1
     source: US-06
   - id: R6.1
+    subsystem: Продаж
     parent: R6
     type: functional
     text: ІС повинна перевіряти рецепт у реєстрі е-рецептів перед оформленням продажу.
     priority: 1
     source: US-06
   - id: R6.2
+    subsystem: Продаж
     parent: R6
     type: functional
     text: >
@@ -186,40 +217,56 @@ requirements:
     priority: 1
     source: інтерв'ю із завідувачем аптеки
   - id: R6.3
+    subsystem: Продаж
     parent: R6
     type: functional
     text: ІС повинна відмовляти в продажу кількості, що перевищує призначену в рецепті.
     priority: 1
     source: інтерв'ю із завідувачем аптеки
   - id: R6.4
+    subsystem: Продаж
     parent: R6
     type: functional
     text: ІС повинна погашати рецепт у реєстрі під час оформлення продажу.
     priority: 1
     source: US-06
   - id: R6.5
+    subsystem: Продаж
     parent: R6
     type: functional
     text: ІС повинна зменшувати до покупця суму чека на частку реімбурсації, вказану в рецепті.
     priority: 2
     source: інтерв'ю із завідувачем аптеки
   - id: R7
+    subsystem: Продаж
     type: functional
     text: ІС повинна дозволяти фармацевту продавати безрецептурний препарат без рецепта.
     priority: 2
     source: інтерв'ю із завідувачем аптеки
   - id: R7.1
+    subsystem: Продаж
     parent: R7
     type: functional
     text: ІС повинна відмовляти в продажу рецептурного препарату без електронного рецепта.
     priority: 1
     source: інтерв'ю із завідувачем аптеки
+  - id: R7.2
+    subsystem: Продаж
+    parent: R7
+    type: functional
+    text: >
+      ІС повинна відмовляти в продажу безрецептурного препарату в кількості,
+      що перевищує ліміт для одного чека.
+    priority: 2
+    source: ІЗ, етап 1
   - id: R8
+    subsystem: Продаж
     type: functional
     text: ІС повинна відмовляти в продажу препарату з партії, строк придатності якої минув.
     priority: 1
     source: інтерв'ю із завідувачем аптеки
   - id: R8.1
+    subsystem: Продаж
     parent: R8
     type: functional
     text: ІС повинна під час продажу добирати партію з найближчим строком придатності.
@@ -266,6 +313,7 @@ requirements:
     priority: 1
     source: інтерв'ю із завідувачем аптеки
   - id: N2
+    subsystem: Продаж
     type: performance
     text: >
       ІС повинна оформлювати продаж не довше ніж за 5 с без урахування часу
@@ -283,6 +331,7 @@ requirements:
     priority: 3
     source: інтерв'ю із завідувачем аптеки
   - id: N5
+    subsystem: Продаж
     type: security
     text: ІС повинна дозволяти оформлення продажу лише користувачам із роллю «фармацевт».
     priority: 1

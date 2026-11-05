@@ -26,6 +26,8 @@ class LocalRegistry:
         self.online = online
 
     def find(self, number: str) -> EPrescription | None:
+        if not self.online:
+            raise RegistryUnavailable
         return self._prescriptions.get(number)
 
     def redeem(self, recipe: EPrescription, quantity: int, today: date) -> None:

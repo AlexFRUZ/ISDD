@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import sys
 from contextlib import closing
+from datetime import date
 
 from pharmacy.controllers.factory import build_app, create_demo_data
 from pharmacy.foundation.errors import DomainError, Refused
@@ -44,6 +45,21 @@ def build_parser() -> argparse.ArgumentParser:
     sell.add_argument("--recipe", required=True)
     sell.add_argument("--qty", type=int, default=1)
     sell.add_argument("--registry-down", action="store_true", help="змоделювати збій реєстру")
+
+    issue = commands.add_parser("issue", help="UC6 Видати резерв")
+    issue.add_argument("--pharmacist", required=True)
+    issue.add_argument("--code", required=True)
+    issue.add_argument("--payment", choices=["готівка", "картка"], default="картка")
+
+    otc = commands.add_parser("sell-otc", help="UC8 Продати безрецептурний препарат")
+    otc.add_argument("--pharmacist", required=True)
+    otc.add_argument("--drug", required=True)
+    otc.add_argument("--qty", type=int, default=1)
+    otc.add_argument("--payment", choices=["готівка", "картка"], default="картка")
+
+    verify = commands.add_parser("verify-recipe", help="UC9 Перевірити е-рецепт")
+    verify.add_argument("--recipe", required=True)
+    verify.add_argument("--registry-down", action="store_true", help="змоделювати збій реєстру")
     return parser
 
 
@@ -73,8 +89,19 @@ def run(args: argparse.Namespace) -> str:
         with closing(build_app(args.data)) as app:
             codes = app.expiration.expire_overdue()
         return f"Анульовано резервувань: {len(codes)}"
-    with closing(build_app(args.data, not args.registry_down)) as app:
-        result = app.sales.sell(args.pharmacist, args.recipe, args.qty)
+    if args.command == "issue":
+        with closing(build_app(args.data)) as app:
+            result = app.reserved_sales.issue(args.pharmacist, args.code, args.payment)
+    elif args.command == "sell-otc":
+        with closing(build_app(args.data)) as app:
+            result = app.otc_sales.sell(args.pharmacist, args.drug, args.qty, args.payment)
+    elif args.command == "verify-recipe":
+        with closing(build_app(args.data, not args.registry_down)) as app:
+            recipe = app.recipe_verification.verify(args.recipe, date.today())
+        return f"Рецепт {recipe.number} чинний: {recipe.inn}, {recipe.prescribed_quantity} уп."
+    else:
+        with closing(build_app(args.data, not args.registry_down)) as app:
+            result = app.sales.sell(args.pharmacist, args.recipe, args.qty)
     return (f"Продаж {result.number} оформлено: {result.trade_name}, партія {result.series}, "
             f"{result.quantity} уп., до сплати {result.total} грн")
 

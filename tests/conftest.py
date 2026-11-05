@@ -8,9 +8,10 @@ from pharmacy.controllers.prescription_sale_controller import PrescriptionSaleCo
 from pharmacy.controllers.reservation.cancel_controller import CancelReservationController
 from pharmacy.controllers.reservation.expire_controller import ExpireReservationsController
 from pharmacy.controllers.reservation.extend_controller import ExtendReservationController
-from pharmacy.controllers.reservation.interface import RegistryRecipeVerifier, ReservationProvider
+from pharmacy.controllers.reservation.interface import ReservationProvider
 from pharmacy.controllers.reservation.prepare_controller import PrepareReservationController
 from pharmacy.controllers.reservation.reserve_controller import ReservationController
+from pharmacy.controllers.sales import OtcSaleController, PrescriptionVerificationService, ReservedSaleController
 from pharmacy.network.registry import LocalRegistry
 from pharmacy.network.sms import LocalSmsGateway
 from pharmacy.persistence.memory import MemoryUnitOfWork
@@ -46,6 +47,9 @@ class Context:
     expiration: ExpireReservationsController
     sms: LocalSmsGateway
     provider: ReservationProvider
+    reserved_sales: ReservedSaleController
+    otc_sales: OtcSaleController
+    recipe_verification: PrescriptionVerificationService
     clock: dict
 
     def batch(self, series):
@@ -69,10 +73,14 @@ def build_context(uow):
         return moment["now"]
 
     sms = LocalSmsGateway()
-    return Context(uow, registry, ReservationController(uow, RegistryRecipeVerifier(registry), clock),
-                   PrescriptionSaleController(uow, registry, clock), CancelReservationController(uow),
+    verification = PrescriptionVerificationService(registry)
+    provider = ReservationProvider(uow)
+    return Context(uow, registry, ReservationController(uow, verification, clock),
+                   PrescriptionSaleController(uow, verification, clock), CancelReservationController(uow),
                    PrepareReservationController(uow, sms), ExtendReservationController(uow),
-                   ExpireReservationsController(uow, clock), sms, ReservationProvider(uow), moment)
+                   ExpireReservationsController(uow, clock), sms, provider,
+                   ReservedSaleController(uow, provider, verification, clock),
+                   OtcSaleController(uow, clock), verification, moment)
 
 
 @pytest.fixture(params=BACKENDS, ids=str)

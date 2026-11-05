@@ -1,0 +1,19 @@
+requirement;UC6;UC7;UC8;UC9;tests
+R5;X;;;;tests/test_sales_subsystem.py
+R5.1;X;;;;tests/test_sales_subsystem.py
+R5.2;X;;;;tests/test_sales_subsystem.py
+R5.3;X;;;;tests/test_sales_subsystem.py
+R6;;X;;X;tests/test_controllers.py tests/test_uc7_integration.py
+R6.1;;X;;X;tests/test_sales_subsystem.py tests/test_uc7_integration.py
+R6.2;;X;;X;tests/test_sales_subsystem.py tests/test_uc7_integration.py
+R6.3;;X;;;tests/test_controllers.py tests/test_uc7_integration.py
+R6.4;X;X;;;tests/test_sales_subsystem.py tests/test_uc7_integration.py
+R6.5;;X;;;tests/test_uc7_integration.py
+R7;;;X;;tests/test_sales_subsystem.py
+R7.1;;;X;;tests/test_sales_subsystem.py
+R7.2;;;X;;tests/test_sales_subsystem.py
+R8;X;X;X;;tests/test_sales_subsystem.py tests/test_uc7_integration.py
+R8.1;;X;X;;tests/test_sales_subsystem.py tests/test_uc7_integration.py
+N2;X;X;X;;tests and CLI demo
+N5;X;X;X;;unknown pharmacist tests
+R2.4;;;;X;tests/test_reservation_subsystem.py

@@ -24,6 +24,11 @@ class Pharmacy:
         suitable = [b for b in self.batches if b.drug.inn == inn and b.can_supply(quantity, today)]
         return min(suitable, key=lambda b: b.expiry_date, default=None)
 
+    def pick_batch_for_trade_name(self, trade_name: str, quantity: int, today: date) -> Batch | None:
+        suitable = [b for b in self.batches
+                    if b.drug.trade_name == trade_name and b.can_supply(quantity, today)]
+        return min(suitable, key=lambda b: b.expiry_date, default=None)
+
     def pick_batch_for_reservation(self, trade_name: str, quantity: int, today: date) -> Batch | None:
         suitable = [b for b in self.batches
                     if b.drug.trade_name == trade_name and b.can_be_reserved(quantity, today)]

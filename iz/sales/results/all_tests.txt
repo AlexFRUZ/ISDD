@@ -1,0 +1,7 @@
+lab1   58 passed
+lab2   128 passed
+lab3   26 passed
+lab4   66 passed
+lab5   20 passed
+lab6   30 passed
+tests  503 passed
