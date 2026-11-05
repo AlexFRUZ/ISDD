@@ -32,6 +32,7 @@ pharmacy/         застосунок, створений у ЛР 5 і розв
   domain/         доменні класи, машина станів, ціноутворення
   foundation/     винятки, контракти, час
 tests/            тести застосунку
+iz/reservation/   індивідуальне завдання: підсистема «Резервування» (Гладун Олександр)
 tools/            рендеринг діаграм
 ```
 
@@ -54,6 +55,10 @@ python -m venv .venv
 .venv/bin/python -m pharmacy.ui.cli seed
 .venv/bin/python -m pharmacy.ui.cli reserve --phone +380671112233 --pharmacy А-01 --drug Парацетамол --qty 2
 .venv/bin/python -m pharmacy.ui.cli sell --pharmacist Ф-7 --recipe E-100 --qty 1
+.venv/bin/python -m pharmacy.ui.cli prepare --pharmacist Ф-7 --code R-6
+.venv/bin/python -m pharmacy.ui.cli extend --pharmacist Ф-7 --code R-6
+.venv/bin/python -m pharmacy.ui.cli cancel --phone +380671112233 --code R-6
+.venv/bin/python -m pharmacy.ui.cli expire
 ```
 
 Покриття коду:
@@ -124,4 +129,4 @@ python schema_diagram.py
 ## Обмеження
 
 Мережа, її дані та учасники є навчальним припущенням. Реєстр е-рецептів замінено локальною реалізацією з
-тим самим інтерфейсом. Варіанти використання UC2 і UC7 реалізовано наскрізно, а решта описані в моделях.
+тим самим інтерфейсом. Варіанти використання UC2–UC5 і UC7 реалізовано наскрізно, а решта описані в моделях.

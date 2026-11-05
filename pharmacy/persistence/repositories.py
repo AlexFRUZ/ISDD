@@ -44,6 +44,7 @@ class CustomerRepository(Repository[Customer, str], Protocol):
 
 class ReservationRepository(Repository[Reservation, str], Protocol):
     def find_active_by_customer(self, phone: str) -> list[Reservation]: ...
+    def find_overdue(self, moment: datetime) -> list[Reservation]: ...
 
 
 class PrescriptionRepository(Repository[EPrescription, str], Protocol):

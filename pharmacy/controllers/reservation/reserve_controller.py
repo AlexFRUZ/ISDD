@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, datetime
 
+from pharmacy.controllers.reservation.interface import RecipeVerifier
 from pharmacy.domain import (
     MAX_ACTIVE_RESERVATIONS, MAX_RESERVATION_QUANTITY, MIN_RESERVATION_QUANTITY,
     Batch, Customer, EPrescription, Reservation, ReservationState,
@@ -10,7 +11,6 @@ from pharmacy.domain import (
 from pharmacy.foundation.clock import Clock, system_clock
 from pharmacy.foundation.contracts import ensure
 from pharmacy.foundation.errors import Refused
-from pharmacy.network.registry import PrescriptionRegistry
 from pharmacy.persistence.repositories import UnitOfWork
 
 
@@ -24,9 +24,9 @@ class ReservationResult:
 
 
 class ReservationController:
-    def __init__(self, uow: UnitOfWork, registry: PrescriptionRegistry, clock: Clock = system_clock) -> None:
+    def __init__(self, uow: UnitOfWork, verifier: RecipeVerifier, clock: Clock = system_clock) -> None:
         self.uow = uow
-        self.registry = registry
+        self.verifier = verifier
         self.clock = clock
 
     def reserve(self, phone: str, pharmacy_number: str, trade_name: str, quantity: int,
@@ -67,7 +67,4 @@ class ReservationController:
             return None
         if number is None:
             raise Refused("6a", "Для рецептурного препарату потрібен номер е-рецепта")
-        recipe = self.registry.find(number)
-        if recipe is None or not recipe.matches(batch.drug.inn, today):
-            raise Refused("6b", f"Рецепт {number} не підходить для цього препарату")
-        return recipe
+        return self.verifier.verified_for(number, batch.drug.inn, today)

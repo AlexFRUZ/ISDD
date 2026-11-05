@@ -1,4 +1,5 @@
 subsystems:
+  Каталог: catalog
   Резервування: reservation
   Продаж: sales
   Склад і звітність: warehouse
@@ -16,7 +17,7 @@ use_cases:
   - id: UC1
     name: Шукати препарат
     actors: [Покупець, Працівник аптеки]
-    subsystem: Резервування
+    subsystem: Каталог
     requirements: [R1, R1.1, R1.2, R1.3, N1]
     tucbw: покупець вводить назву препарату на сторінці пошуку
     tucew: покупець бачить перелік аптек із залишком і ціною або перелік аналогів
@@ -26,7 +27,7 @@ use_cases:
     name: Зарезервувати препарат
     actors: [Покупець]
     subsystem: Резервування
-    requirements: [R2, R2.1, R2.2, R2.3, R2.4, R2.5, R4, R4.1]
+    requirements: [R2, R2.1, R2.2, R2.3, R2.4, R2.5, R4, R4.1, N7, N8]
     include: [UC9]
     extend: [UC1]
     tucbw: покупець обирає аптеку й кількість у результатах пошуку
@@ -37,7 +38,7 @@ use_cases:
     name: Скасувати резервування
     actors: [Покупець]
     subsystem: Резервування
-    requirements: [R3]
+    requirements: [R3, R3.1, R3.2]
     tucbw: покупець відкриває власне активне резервування
     tucew: покупець бачить підтвердження скасування
     effort: 1
@@ -46,7 +47,7 @@ use_cases:
     name: Підготувати резерв
     actors: [Фармацевт, SMS-шлюз]
     subsystem: Резервування
-    requirements: [R12]
+    requirements: [R12, R12.1]
     tucbw: фармацевт відкриває перелік нових резервувань своєї аптеки
     tucew: покупець отримує сповіщення про готовність резерву
     effort: 2

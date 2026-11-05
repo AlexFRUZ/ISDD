@@ -324,6 +324,12 @@ class SqliteReservationRepository(SqliteRepository):
         customer = self._uow.customers.get(phone)
         return customer.active_reservations if customer else []
 
+    def find_overdue(self, moment: datetime) -> list[Reservation]:
+        rows = self._all("""SELECT code FROM reservation
+                            WHERE state IN ('Підтверджене', 'Готове', 'Продовжене') AND expires_at < ?""",
+                         _stamp(moment))
+        return [self.get(r["code"]) for r in rows]
+
 
 class SqlitePrescriptionRepository(SqliteRepository):
     def _doctor(self, doctor_id: int) -> Doctor:

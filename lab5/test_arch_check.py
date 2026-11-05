@@ -82,6 +82,28 @@ def test_same_layer_import_is_allowed(tmp_path):
     assert messages(root) == []
 
 
+SUBSYSTEM_RULES = {
+    "package": "shop", "layers": ["controllers"], "allowed": {"controllers": []},
+    "subsystems": {"orders": ["shop.controllers.stock.api"], "stock": []},
+}
+
+
+def subsystem_package(tmp_path, statement):
+    return make_package(tmp_path, {"controllers/__init__.py": "", "controllers/orders/__init__.py": "",
+                                   "controllers/stock/__init__.py": "", "controllers/stock/api.py": "",
+                                   "controllers/stock/core.py": "", "controllers/orders/flow.py": statement})
+
+
+def test_subsystem_may_use_agreed_interface(tmp_path):
+    root = subsystem_package(tmp_path, "from shop.controllers.stock.api import x\n")
+    assert messages(root, SUBSYSTEM_RULES) == []
+
+
+def test_subsystem_may_not_use_internals_of_other_subsystem(tmp_path):
+    root = subsystem_package(tmp_path, "from shop.controllers.stock.core import x\n")
+    assert "поза погодженим інтерфейсом" in messages(root, SUBSYSTEM_RULES)[0]
+
+
 def test_cycle_is_found():
     assert ac.find_cycles({"a": {"b"}, "b": {"c"}, "c": {"a"}}) == [["a", "b", "c", "a"]]
 

@@ -48,3 +48,25 @@ def test_registry_down_flag(run):
 def test_contract_violation_is_reported_without_traceback(run):
     code, out = run("sell", "--pharmacist", "Ф-7", "--recipe", "E-100", "--qty", "0")
     assert code == 1 and out.startswith("Відмова: Кількість має бути додатною")
+
+
+def test_cancel_command(run):
+    run("reserve", "--phone", "+380671112233", "--pharmacy", "А-01", "--drug", "Парацетамол")
+    code, out = run("cancel", "--phone", "+380671112233", "--code", "R-6")
+    assert code == 0 and "R-6 скасовано" in out
+
+
+def test_prepare_and_extend_commands(run):
+    run("reserve", "--phone", "+380671112233", "--pharmacy", "А-01", "--drug", "Парацетамол")
+    assert "покупця сповіщено" in run("prepare", "--pharmacist", "Ф-7", "--code", "R-6")[1]
+    assert "продовжено до" in run("extend", "--pharmacist", "Ф-7", "--code", "R-6")[1]
+
+
+def test_prepare_with_sms_down(run):
+    run("reserve", "--phone", "+380671112233", "--pharmacy", "А-01", "--drug", "Парацетамол")
+    assert "сповіщення не надіслано" in run("prepare", "--pharmacist", "Ф-7", "--code", "R-6", "--sms-down")[1]
+
+
+def test_expire_command(run):
+    code, out = run("expire")
+    assert code == 0 and out.startswith("Анульовано резервувань: 0")

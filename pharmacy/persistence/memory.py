@@ -80,6 +80,9 @@ class MemoryReservationRepository(MemoryRepository):
     def find_active_by_customer(self, phone: str) -> list[Reservation]:
         return [r for r in self._items.values() if r.customer.phone == phone and r.is_active]
 
+    def find_overdue(self, moment: datetime) -> list[Reservation]:
+        return [r for r in self._items.values() if r.is_overdue(moment)]
+
 
 class MemoryPrescriptionRepository(MemoryRepository):
     def find_by_state(self, state: PrescriptionState) -> list[EPrescription]:

@@ -1,0 +1,25 @@
+Клас                           метод. атриб.  DIT  fan-in  fan-out  рішень
+ReservationStatus                   0      4    0       3        0       0
+CancelReservationController         1      1    0       1        4       3
+Customer                            4      3    0       6        3       2
+ExpireReservationsController        1      2    0       1        1       2
+ExtendReservationController         1      1    0       1        4       2
+RecipeVerifier                      1      0    0       1        1       0
+RegistryRecipeVerifier              1      1    0       0        3       2
+ReservationProvider                 2      1    0       0        2       0
+MemoryReservationRepository         2      0    1       1        2       5
+PrepareReservationController        2      2    0       1        7       2
+CustomerRepository                  0      0    0       1        2       0
+ReservationRepository               2      0    0       1        2       0
+Reservation                        21     10    0       7        5       8
+ReservationState                    0      0    0       6        0       0
+ReservationController               3      3    0       1        9       7
+ReservationResult                   0      5    0       1        0       0
+LocalSmsGateway                     1      2    0       0        1       1
+SmsGateway                          1      0    0       1        0       0
+SqliteCustomerRepository            3      0    1       1        2       2
+SqliteReservationRepository         7      0    1       1        4       9
+УВАГА: PrepareReservationController – fan-out 7 (> 5)
+УВАГА: ReservationController – fan-out 9 (> 5)
+УВАГА: Reservation – методів 21 (> 10)
+Класів: 77. Середній fan-out: 2.4

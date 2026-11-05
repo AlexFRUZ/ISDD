@@ -79,35 +79,41 @@ requirements:
     priority: 2
     source: інтерв'ю із завідувачем аптеки
   - id: R2
+    subsystem: Резервування
     type: functional
     text: ІС повинна дозволяти покупцю резервувати препарат у вибраній аптеці.
     priority: 1
     source: US-02
   - id: R2.1
+    subsystem: Резервування
     parent: R2
     type: functional
     text: ІС повинна відмовляти в резервуванні покупцю, який уже має 3 активні резервування.
     priority: 1
     source: інтерв'ю із завідувачем аптеки
   - id: R2.2
+    subsystem: Резервування
     parent: R2
     type: functional
     text: ІС повинна приймати резервування лише на кількість від 1 до 6 упаковок.
     priority: 1
     source: інтерв'ю із завідувачем аптеки, зміна вимоги директором мережі
   - id: R2.3
+    subsystem: Резервування
     parent: R2
     type: functional
     text: ІС повинна зменшувати доступний залишок на зарезервовану кількість на час дії резервування.
     priority: 1
     source: US-02
   - id: R2.4
+    subsystem: Резервування
     parent: R2
     type: functional
     text: ІС повинна вимагати номер чинного електронного рецепта для резервування рецептурного препарату.
     priority: 2
     source: інтерв'ю із завідувачем аптеки
   - id: R2.5
+    subsystem: Резервування
     parent: R2
     type: functional
     text: >
@@ -116,22 +122,40 @@ requirements:
     priority: 2
     source: інтерв'ю із завідувачем аптеки
   - id: R3
+    subsystem: Резервування
     type: functional
     text: ІС повинна дозволяти покупцю скасовувати власне активне резервування.
     priority: 2
     source: US-03
+  - id: R3.1
+    subsystem: Резервування
+    parent: R3
+    type: functional
+    text: ІС повинна дозволяти скасування лише покупцю, який створив це резервування.
+    priority: 1
+    source: ІЗ, етап 1
+  - id: R3.2
+    subsystem: Резервування
+    parent: R3
+    type: functional
+    text: ІС повинна відновлювати доступний залишок партії після скасування резервування покупцем.
+    priority: 1
+    source: ІЗ, етап 1
   - id: R4
+    subsystem: Резервування
     type: functional
     text: ІС повинна анулювати резервування, не видане протягом 24 годин від створення.
     priority: 1
     source: інтерв'ю із завідувачем аптеки
   - id: R4.1
+    subsystem: Резервування
     parent: R4
     type: functional
     text: ІС повинна повертати кількість анульованого резервування до доступного залишку.
     priority: 1
     source: інтерв'ю із завідувачем аптеки
   - id: R4.2
+    subsystem: Резервування
     parent: R4
     type: functional
     text: ІС повинна дозволяти фармацевту один раз продовжити резервування на 24 години.
@@ -217,10 +241,18 @@ requirements:
     priority: 3
     source: US-09
   - id: R12
+    subsystem: Резервування
     type: functional
     text: ІС повинна надсилати покупцю сповіщення про готовність резервування.
     priority: 3
     source: US-04
+  - id: R12.1
+    subsystem: Резервування
+    parent: R12
+    type: functional
+    text: ІС повинна фіксувати, чи отримав покупець сповіщення, якщо SMS-шлюз недоступний.
+    priority: 3
+    source: ІЗ, етап 1
   - id: R13
     type: functional
     text: >
@@ -260,6 +292,18 @@ requirements:
     text: ІС повинна обробляти персональні дані покупців відповідно до Закону України про їх захист.
     priority: 1
     source: системний запит
+  - id: N7
+    subsystem: Резервування
+    type: performance
+    text: ІС повинна оформлювати резервування не довше ніж за 3 с при 200 одночасних користувачах.
+    priority: 2
+    source: ІЗ, етап 1
+  - id: N8
+    subsystem: Резервування
+    type: performance
+    text: ІС повинна анулювати прострочене резервування не пізніше ніж за 5 хвилин після завершення строку.
+    priority: 2
+    source: ІЗ, етап 1
   - id: C1
     type: constraint
     text: ІС повинна бути реалізована мовою Python 3.10 або новішою.

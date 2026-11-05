@@ -90,7 +90,7 @@ def dcd_classes():
 
 MODULES = ["pharmacy.domain", "pharmacy.persistence.repositories", "pharmacy.network.registry",
            "pharmacy.controllers.prescription_sale_controller",
-           "pharmacy.controllers.reservation_controller"]
+           "pharmacy.controllers.reservation.reserve_controller"]
 
 
 def find_class(name):

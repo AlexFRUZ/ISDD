@@ -1,0 +1,6 @@
+Use cases: 13, акторів: 7, зауважень: 0
+Матрицю збережено: /home/alex/pharmacy-is/iz/reservation/RUTM.md, /home/alex/pharmacy-is/iz/reservation/RUTM.csv
+Порожні рядки: немає
+Порожні стовпці: немає
+Неіснуючі вимоги: немає
+Вимог із тестами: 14 із 16

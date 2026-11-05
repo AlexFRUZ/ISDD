@@ -137,11 +137,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--iterations", type=int, default=3)
     parser.add_argument("--functional-only", action="store_true")
     parser.add_argument("--tests")
+    parser.add_argument("--subsystem")
     parser.add_argument("--output", default="RUTM")
     args = parser.parse_args(argv)
 
     tests = find_tests(args.tests) if args.tests else {}
-    matrix = Matrix(load_yaml(args.srs)["requirements"], load_yaml(args.use_cases)["use_cases"], tests)
+    requirements = load_yaml(args.srs)["requirements"]
+    use_cases = load_yaml(args.use_cases)["use_cases"]
+    if args.subsystem:
+        requirements = [r for r in requirements if r.get("subsystem") == args.subsystem]
+        use_cases = [uc for uc in use_cases if uc["subsystem"] == args.subsystem]
+    matrix = Matrix(requirements, use_cases, tests)
     rows = matrix.table()
     write_markdown(rows, f"{args.output}.md")
     write_csv(rows, f"{args.output}.csv")
@@ -153,11 +159,12 @@ def main(argv: list[str] | None = None) -> int:
     unknown = matrix.unknown_references()
     print("Неіснуючі вимоги:", _names([f"{uc} -> {ref}" for uc, ref in unknown]))
 
-    plan, reasons = plan_iterations(matrix, args.capacity, args.iterations)
-    for number, iteration in enumerate(plan, start=1):
-        load = sum(uc["effort"] for uc in iteration)
-        print(f"Ітерація {number} ({load}/{args.capacity}):", _names([uc["id"] for uc in iteration]))
-    print("Не розподілено:", _names([f"{uc} ({why})" for uc, why in reasons.items()]))
+    if not args.subsystem:
+        plan, reasons = plan_iterations(matrix, args.capacity, args.iterations)
+        for number, iteration in enumerate(plan, start=1):
+            load = sum(uc["effort"] for uc in iteration)
+            print(f"Ітерація {number} ({load}/{args.capacity}):", _names([uc["id"] for uc in iteration]))
+        print("Не розподілено:", _names([f"{uc} ({why})" for uc, why in reasons.items()]))
     if tests:
         covered = sum(1 for r in matrix.requirements if r["id"] in tests)
         print(f"Вимог із тестами: {covered} із {len(matrix.requirements)}")

@@ -1,0 +1,70 @@
+@startuml dcd_reservation
+title Фрагмент діаграми класів проєкту: підсистема «Резервування»
+skinparam classAttributeIconSize 0
+skinparam nodesep 40
+skinparam ranksep 60
+hide circle
+
+class ReservationController <<controller>> {
+  +reserve(phone: str, pharmacy_number: str, trade_name: str, quantity: int, recipe_number: str): ReservationResult
+}
+class CancelReservationController <<controller>> {
+  +cancel(phone: str, code: str): ReservationStatus
+}
+class PrepareReservationController <<controller>> {
+  +prepare(personnel_number: str, code: str): ReservationStatus
+}
+class ExtendReservationController <<controller>> {
+  +extend(personnel_number: str, code: str): ReservationStatus
+}
+class ExpireReservationsController <<controller>> {
+  +expire_overdue(): list
+}
+class ReservationProvider <<interface підсистеми>> {
+  +find(code: str): Reservation
+  +complete_issue(reservation: Reservation, moment: datetime)
+}
+class RecipeVerifier <<interface>> {
+  +verified_for(number: str, inn: str, today: date): EPrescription
+}
+class SmsGateway <<adapter>> {
+  +send(phone: str, text: str)
+}
+class Customer {
+  -phone: str
+  -full_name: str
+  +can_reserve: bool
+  +create_reservation(code: str, now: datetime, quantity: int, batch: Batch, prescription: EPrescription): Reservation
+}
+class Reservation {
+  -code: str
+  -quantity: int
+  -expires_at: datetime
+  -state: ReservationState
+  +belongs_to(phone: str): bool
+  +is_at_pharmacy(number: str): bool
+  +is_overdue(moment: datetime): bool
+  +confirm()
+  +prepare()
+  +extend()
+  +cancel()
+  +expire(moment: datetime)
+  +issue(moment: datetime)
+}
+class Batch {
+  +block(quantity: int)
+  +unblock(quantity: int)
+}
+
+ReservationController ..> RecipeVerifier : <<call>>
+ReservationController ..> Customer : <<call>>
+PrepareReservationController ..> SmsGateway : <<call>>
+CancelReservationController ..> Reservation : <<call>>
+PrepareReservationController ..> Reservation : <<call>>
+ExtendReservationController ..> Reservation : <<call>>
+ExpireReservationsController ..> Reservation : <<call>>
+ReservationProvider ..> Reservation : <<call>>
+Customer ..> Reservation : <<create>>
+Customer "1" -- "0..3" Reservation
+Reservation "0..*" -- "1" Batch
+@enduml

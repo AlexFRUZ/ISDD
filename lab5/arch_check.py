@@ -75,6 +75,24 @@ def collect_imports(root: Path, package: str) -> tuple[list[Import], int]:
     return imports, len(files)
 
 
+def subsystem_of(name: str, package: str, subsystems: dict) -> str:
+    parts = name.replace("/", ".").removesuffix(".py").split(".")
+    is_controller = parts[:2] == [package, "controllers"] and len(parts) > 2
+    return parts[2] if is_controller and parts[2] in subsystems else ""
+
+
+def find_subsystem_violations(imports: list[Import], rules: dict) -> list[Violation]:
+    subsystems = rules.get("subsystems", {})
+    violations: list[Violation] = []
+    for item in imports:
+        source = subsystem_of(item.file, rules["package"], subsystems)
+        target = subsystem_of(item.module, rules["package"], subsystems)
+        if source and target and source != target and item.module not in subsystems[source]:
+            violations.append(Violation(
+                item.file, item.line, f"підсистема {source} імпортує {item.module} поза погодженим інтерфейсом"))
+    return violations
+
+
 def find_violations(imports: list[Import], rules: dict) -> list[Violation]:
     layers = rules["layers"]
     allowed = rules["allowed"]
@@ -149,7 +167,8 @@ def check(root: Path, rules: dict) -> tuple[list[Violation], list[list[str]], di
     imports, modules = collect_imports(root, rules["package"])
     graph = package_graph(imports)
     cross = sum(1 for i in imports if i.source and i.target and i.source != i.target)
-    return find_violations(imports, rules), find_cycles(graph), graph, modules, cross
+    violations = find_violations(imports, rules) + find_subsystem_violations(imports, rules)
+    return violations, find_cycles(graph), graph, modules, cross
 
 
 def main(argv: list[str] | None = None) -> int:

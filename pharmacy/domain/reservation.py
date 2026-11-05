@@ -36,6 +36,10 @@ class ReservationState(Enum):
     ARCHIVED = "[*]"
 
 
+EXPIRABLE_RESERVATION_STATES = {
+    ReservationState.CONFIRMED, ReservationState.READY, ReservationState.EXTENDED,
+}
+
 ACTIVE_RESERVATION_STATES = {
     ReservationState.NEW, ReservationState.CONFIRMED,
     ReservationState.READY, ReservationState.EXTENDED,
@@ -90,6 +94,15 @@ class Reservation:
     @property
     def is_active(self) -> bool:
         return self.state in ACTIVE_RESERVATION_STATES
+
+    def belongs_to(self, phone: str) -> bool:
+        return self.customer.phone == phone
+
+    def is_at_pharmacy(self, number: str) -> bool:
+        return self.batch.pharmacy.number == number
+
+    def is_overdue(self, moment: datetime) -> bool:
+        return self.state in EXPIRABLE_RESERVATION_STATES and moment > self.expires_at
 
     @keeps_invariant
     def fire(self, event: str, moment: datetime | None = None) -> None:

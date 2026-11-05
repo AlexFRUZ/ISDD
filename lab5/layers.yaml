@@ -17,3 +17,5 @@ forbidden_modules:
   domain: [sqlite3, argparse, pickle, json, flask, fastapi]
   foundation: [sqlite3, argparse, pickle, flask, fastapi]
   controllers: [sqlite3, argparse]
+subsystems:
+  reservation: []

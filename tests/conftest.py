@@ -5,8 +5,14 @@ from datetime import date, datetime
 import pytest
 
 from pharmacy.controllers.prescription_sale_controller import PrescriptionSaleController
-from pharmacy.controllers.reservation_controller import ReservationController
+from pharmacy.controllers.reservation.cancel_controller import CancelReservationController
+from pharmacy.controllers.reservation.expire_controller import ExpireReservationsController
+from pharmacy.controllers.reservation.extend_controller import ExtendReservationController
+from pharmacy.controllers.reservation.interface import RegistryRecipeVerifier, ReservationProvider
+from pharmacy.controllers.reservation.prepare_controller import PrepareReservationController
+from pharmacy.controllers.reservation.reserve_controller import ReservationController
 from pharmacy.network.registry import LocalRegistry
+from pharmacy.network.sms import LocalSmsGateway
 from pharmacy.persistence.memory import MemoryUnitOfWork
 from pharmacy.persistence.seed import populate
 from pharmacy.persistence.sqlite import SqliteUnitOfWork, create_schema
@@ -34,6 +40,13 @@ class Context:
     registry: LocalRegistry
     reservations: ReservationController
     sales: PrescriptionSaleController
+    cancellation: CancelReservationController
+    preparation: PrepareReservationController
+    extension: ExtendReservationController
+    expiration: ExpireReservationsController
+    sms: LocalSmsGateway
+    provider: ReservationProvider
+    clock: dict
 
     def batch(self, series):
         pharmacy, drug = {"AM": ("А-01", "Амоксил"), "IN": ("А-02", "Актрапід"),
@@ -50,11 +63,16 @@ def build_context(uow):
     populate(uow, TODAY)
     registry = LocalRegistry(uow.prescriptions)
 
-    def clock():
-        return NOW
+    moment = {"now": NOW}
 
-    return Context(uow, registry, ReservationController(uow, registry, clock),
-                   PrescriptionSaleController(uow, registry, clock))
+    def clock():
+        return moment["now"]
+
+    sms = LocalSmsGateway()
+    return Context(uow, registry, ReservationController(uow, RegistryRecipeVerifier(registry), clock),
+                   PrescriptionSaleController(uow, registry, clock), CancelReservationController(uow),
+                   PrepareReservationController(uow, sms), ExtendReservationController(uow),
+                   ExpireReservationsController(uow, clock), sms, ReservationProvider(uow), moment)
 
 
 @pytest.fixture(params=BACKENDS, ids=str)

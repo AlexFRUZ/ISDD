@@ -25,6 +25,7 @@ class Requirement:
     source: str = ""
     priority: Any = None
     parent: str | None = None
+    subsystem: str = ""
 
 
 @dataclass
@@ -67,6 +68,7 @@ def _load_requirement(raw: dict) -> Requirement:
         source=normalize_text(raw.get("source")),
         priority=raw.get("priority"),
         parent=normalize_text(parent) if parent is not None else None,
+        subsystem=normalize_text(raw.get("subsystem")),
     )
 
 

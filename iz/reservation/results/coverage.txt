@@ -1,0 +1,10 @@
+pharmacy/controllers/reservation/__init__.py                 0      0      0      0   100%
+pharmacy/controllers/reservation/access.py                  24      0      6      0   100%
+pharmacy/controllers/reservation/cancel_controller.py       23      0      4      0   100%
+pharmacy/controllers/reservation/expire_controller.py       16      0      2      0   100%
+pharmacy/controllers/reservation/extend_controller.py       22      0      4      0   100%
+pharmacy/controllers/reservation/interface.py               25      0      2      0   100%
+pharmacy/controllers/reservation/prepare_controller.py      27      0      2      0   100%
+pharmacy/controllers/reservation/reserve_controller.py      54      0     10      0   100%
+TOTAL                                                      191      0     30      0   100%
+459 passed in 2.13s

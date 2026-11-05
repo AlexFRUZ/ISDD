@@ -6,27 +6,23 @@ skinparam packageStyle rectangle
 actor "Покупець" as A1
 actor "Працівник аптеки" as A2
 actor "Фармацевт" as A3
-actor "Завідувач аптеки" as A4
-actor "SMS-шлюз" as A5 <<система>>
+actor "SMS-шлюз" as A4 <<система>>
 
 rectangle "Резервування" {
-  usecase "UC1 Шукати препарат" as UC1
   usecase "UC2 Зарезервувати препарат" as UC2
   usecase "UC3 Скасувати резервування" as UC3
   usecase "UC4 Підготувати резерв" as UC4
   usecase "UC5 Продовжити резервування" as UC5
 }
 
+usecase "UC1 Шукати препарат" as UC1
 usecase "UC9 Перевірити е-рецепт" as UC9
 A2 <|-- A3
-A2 <|-- A4
-A1 -- UC1
-A2 -- UC1
 A1 -- UC2
 UC2 ..> UC9 : <<include>>
 UC2 ..> UC1 : <<extend>>
 A1 -- UC3
 A3 -- UC4
-A5 -- UC4
+A4 -- UC4
 A3 -- UC5
 @enduml

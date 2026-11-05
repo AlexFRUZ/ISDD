@@ -1,0 +1,19 @@
+@startuml uc_catalog
+title Діаграма варіантів використання: підсистема «Каталог»
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Покупець" as A1
+actor "Працівник аптеки" as A2
+actor "Фармацевт" as A3
+actor "Завідувач аптеки" as A4
+
+rectangle "Каталог" {
+  usecase "UC1 Шукати препарат" as UC1
+}
+
+A2 <|-- A3
+A2 <|-- A4
+A1 -- UC1
+A2 -- UC1
+@enduml

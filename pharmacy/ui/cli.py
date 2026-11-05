@@ -24,6 +24,21 @@ def build_parser() -> argparse.ArgumentParser:
     reserve.add_argument("--qty", type=int, default=1)
     reserve.add_argument("--recipe")
 
+    cancel = commands.add_parser("cancel", help="UC3 Скасувати резервування")
+    cancel.add_argument("--phone", required=True)
+    cancel.add_argument("--code", required=True)
+
+    prepare = commands.add_parser("prepare", help="UC4 Підготувати резерв")
+    prepare.add_argument("--pharmacist", required=True)
+    prepare.add_argument("--code", required=True)
+    prepare.add_argument("--sms-down", action="store_true", help="змоделювати збій SMS-шлюзу")
+
+    extend = commands.add_parser("extend", help="UC5 Продовжити резервування")
+    extend.add_argument("--pharmacist", required=True)
+    extend.add_argument("--code", required=True)
+
+    commands.add_parser("expire", help="анулювати прострочені резервування")
+
     sell = commands.add_parser("sell", help="UC7 Продати за е-рецептом")
     sell.add_argument("--pharmacist", required=True)
     sell.add_argument("--recipe", required=True)
@@ -41,6 +56,23 @@ def run(args: argparse.Namespace) -> str:
             result = app.reservations.reserve(args.phone, args.pharmacy, args.drug, args.qty, args.recipe)
         return (f"Резервування {result.code} створено: {result.trade_name}, партія {result.series}, "
                 f"{result.quantity} уп. Дійсне до {result.expires_at:%d.%m.%Y %H:%M}")
+    if args.command == "cancel":
+        with closing(build_app(args.data)) as app:
+            status = app.cancellation.cancel(args.phone, args.code)
+        return f"Резервування {status.code} скасовано"
+    if args.command == "prepare":
+        with closing(build_app(args.data, sms_online=not args.sms_down)) as app:
+            status = app.preparation.prepare(args.pharmacist, args.code)
+        notice = "покупця сповіщено" if status.notified else "сповіщення не надіслано"
+        return f"Резервування {status.code} готове, {notice}"
+    if args.command == "extend":
+        with closing(build_app(args.data)) as app:
+            status = app.extension.extend(args.pharmacist, args.code)
+        return f"Резервування {status.code} продовжено до {status.expires_at:%d.%m.%Y %H:%M}"
+    if args.command == "expire":
+        with closing(build_app(args.data)) as app:
+            codes = app.expiration.expire_overdue()
+        return f"Анульовано резервувань: {len(codes)}"
     with closing(build_app(args.data, not args.registry_down)) as app:
         result = app.sales.sell(args.pharmacist, args.recipe, args.qty)
     return (f"Продаж {result.number} оформлено: {result.trade_name}, партія {result.series}, "
