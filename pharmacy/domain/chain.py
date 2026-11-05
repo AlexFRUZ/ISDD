@@ -19,6 +19,11 @@ class Pharmacy:
     schedule: str
     batches: list[Batch] = field(default_factory=list, repr=False)
     pharmacists: list[Pharmacist] = field(default_factory=list, repr=False)
+    managers: list[Manager] = field(default_factory=list, repr=False)
+
+    def expiring_batches(self, today: date, days: int) -> list[Batch]:
+        found = [b for b in self.batches if b.quantity > 0 and b.days_until_expiry(today) <= days]
+        return sorted(found, key=lambda b: (b.expiry_date, b.drug.trade_name, b.series))
 
     def pick_batch_for_sale(self, inn: str, quantity: int, today: date) -> Batch | None:
         suitable = [b for b in self.batches if b.drug.inn == inn and b.can_supply(quantity, today)]
@@ -63,3 +68,27 @@ class Pharmacist:
 
     def __post_init__(self) -> None:
         self.pharmacy.pharmacists.append(self)
+
+
+@dataclass(eq=False)
+class Manager:
+
+    personnel_number: str
+    full_name: str
+    pharmacy: Pharmacy
+
+    def __post_init__(self) -> None:
+        self.pharmacy.managers.append(self)
+
+    def may_view(self, pharmacy: Pharmacy) -> bool:
+        return pharmacy is self.pharmacy or pharmacy.number == self.pharmacy.number
+
+
+@dataclass(eq=False)
+class Director:
+
+    personnel_number: str
+    full_name: str
+
+    def may_view(self, pharmacy: Pharmacy) -> bool:
+        return True

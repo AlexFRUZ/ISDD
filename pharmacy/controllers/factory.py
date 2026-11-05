@@ -13,6 +13,9 @@ from pharmacy.controllers.reservation.extend_controller import ExtendReservation
 from pharmacy.controllers.reservation.interface import ReservationProvider
 from pharmacy.controllers.reservation.prepare_controller import PrepareReservationController
 from pharmacy.controllers.reservation.reserve_controller import ReservationController
+from pharmacy.controllers.warehouse import (
+    ExpiryController, ReceiveDeliveryController, SalesReportController, WriteOffController,
+)
 from pharmacy.network.registry import LocalRegistry
 from pharmacy.network.sms import LocalSmsGateway
 from pharmacy.persistence.repositories import UnitOfWork
@@ -31,6 +34,10 @@ class App:
     reserved_sales: ReservedSaleController
     otc_sales: OtcSaleController
     recipe_verification: PrescriptionVerificationService
+    deliveries: ReceiveDeliveryController
+    write_offs: WriteOffController
+    expiry: ExpiryController
+    sales_reports: SalesReportController
 
     def close(self) -> None:
         self.uow.close()
@@ -56,4 +63,8 @@ def build_app(path: str | Path, registry_online: bool = True, sms_online: bool =
         ReservedSaleController(uow, reservation_provider, verification),
         OtcSaleController(uow),
         verification,
+        ReceiveDeliveryController(uow),
+        WriteOffController(uow),
+        ExpiryController(uow),
+        SalesReportController(uow),
     )

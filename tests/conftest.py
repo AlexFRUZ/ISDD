@@ -12,6 +12,9 @@ from pharmacy.controllers.reservation.interface import ReservationProvider
 from pharmacy.controllers.reservation.prepare_controller import PrepareReservationController
 from pharmacy.controllers.reservation.reserve_controller import ReservationController
 from pharmacy.controllers.sales import OtcSaleController, PrescriptionVerificationService, ReservedSaleController
+from pharmacy.controllers.warehouse import (
+    ExpiryController, ReceiveDeliveryController, SalesReportController, WriteOffController,
+)
 from pharmacy.network.registry import LocalRegistry
 from pharmacy.network.sms import LocalSmsGateway
 from pharmacy.persistence.memory import MemoryUnitOfWork
@@ -51,6 +54,10 @@ class Context:
     otc_sales: OtcSaleController
     recipe_verification: PrescriptionVerificationService
     clock: dict
+    deliveries: ReceiveDeliveryController
+    write_offs: WriteOffController
+    expiry: ExpiryController
+    sales_reports: SalesReportController
 
     def batch(self, series):
         pharmacy, drug = {"AM": ("А-01", "Амоксил"), "IN": ("А-02", "Актрапід"),
@@ -80,7 +87,9 @@ def build_context(uow):
                    PrepareReservationController(uow, sms), ExtendReservationController(uow),
                    ExpireReservationsController(uow, clock), sms, provider,
                    ReservedSaleController(uow, provider, verification, clock),
-                   OtcSaleController(uow, clock), verification, moment)
+                   OtcSaleController(uow, clock), verification, moment,
+                   ReceiveDeliveryController(uow, clock), WriteOffController(uow, clock),
+                   ExpiryController(uow, clock), SalesReportController(uow))
 
 
 @pytest.fixture(params=BACKENDS, ids=str)

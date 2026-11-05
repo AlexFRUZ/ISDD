@@ -20,3 +20,4 @@ forbidden_modules:
 subsystems:
   reservation: []
   sales: [pharmacy.controllers.reservation.interface]
+  warehouse: []

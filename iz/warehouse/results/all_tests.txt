@@ -1,0 +1,7 @@
+lab1   58 passed in 0.77s
+lab2   128 passed in 0.09s
+lab3   26 passed in 0.11s
+lab4   66 passed in 0.06s
+lab5   20 passed in 0.17s
+lab6   30 passed in 0.04s
+.      600 passed in 2.16s

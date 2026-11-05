@@ -8,8 +8,9 @@ from decimal import Decimal
 from pathlib import Path
 
 from pharmacy.domain import (
-    Batch, Customer, Doctor, Drug, EPrescription, OtcDrug, PaymentMethod, Pharmacist, Pharmacy,
-    PharmacyChain, PrescriptionDrug, PrescriptionState, Reservation, ReservationState, Sale, SaleLine,
+    Batch, Customer, Delivery, Director, Doctor, Drug, EPrescription, Manager, OtcDrug, PaymentMethod,
+    Pharmacist, Pharmacy, PharmacyChain, PrescriptionDrug, PrescriptionState, Reservation,
+    ReservationState, Sale, SaleLine, Supplier, WriteOff, WriteOffReason,
 )
 
 SQL_DIR = Path(__file__).parent
@@ -66,6 +67,7 @@ class SqlitePharmacyRepository(SqliteRepository):
         self._identity[("pharmacy", pharmacy.number)] = pharmacy
         self._uow.batches.load_for(pharmacy)
         self._uow.pharmacists.load_for(pharmacy)
+        self._uow.managers.load_for(pharmacy)
         return pharmacy
 
     def chain(self) -> PharmacyChain:
@@ -127,6 +129,56 @@ class SqlitePharmacistRepository(SqliteRepository):
     def find_by_pharmacy(self, pharmacy_number: str) -> list[Pharmacist]:
         rows = self._all("SELECT personnel_number FROM pharmacist WHERE pharmacy_number = ?", pharmacy_number)
         return [self.get(r["personnel_number"]) for r in rows]
+
+
+class SqliteManagerRepository(SqliteRepository):
+    def load_for(self, pharmacy: Pharmacy) -> None:
+        for row in self._all("SELECT * FROM manager WHERE pharmacy_number = ?", pharmacy.number):
+            key = ("manager", row["personnel_number"])
+            if key not in self._identity:
+                self._identity[key] = Manager(row["personnel_number"], row["full_name"], pharmacy)
+
+    def get(self, personnel_number: str) -> Manager | None:
+        key = ("manager", personnel_number)
+        if key not in self._identity:
+            row = self._one("SELECT pharmacy_number FROM manager WHERE personnel_number = ?", personnel_number)
+            if row is None:
+                return None
+            self._uow.pharmacies.get(row["pharmacy_number"])
+        return self._identity[key]
+
+    def save(self, manager: Manager) -> None:
+        self._run("""INSERT INTO manager (personnel_number, full_name, pharmacy_number) VALUES (?, ?, ?)
+                     ON CONFLICT (personnel_number) DO UPDATE SET full_name = excluded.full_name,
+                         pharmacy_number = excluded.pharmacy_number""",
+                  manager.personnel_number, manager.full_name, manager.pharmacy.number)
+        self._identity[("manager", manager.personnel_number)] = manager
+
+    def delete(self, personnel_number: str) -> None:
+        self._run("DELETE FROM manager WHERE personnel_number = ?", personnel_number)
+        self._identity.pop(("manager", personnel_number), None)
+
+
+class SqliteDirectorRepository(SqliteRepository):
+    def get(self, personnel_number: str) -> Director | None:
+        key = ("director", personnel_number)
+        if key in self._identity:
+            return self._identity[key]
+        row = self._one("SELECT * FROM director WHERE personnel_number = ?", personnel_number)
+        if row is None:
+            return None
+        self._identity[key] = Director(row["personnel_number"], row["full_name"])
+        return self._identity[key]
+
+    def save(self, director: Director) -> None:
+        self._run("""INSERT INTO director (personnel_number, full_name) VALUES (?, ?)
+                     ON CONFLICT (personnel_number) DO UPDATE SET full_name = excluded.full_name""",
+                  director.personnel_number, director.full_name)
+        self._identity[("director", director.personnel_number)] = director
+
+    def delete(self, personnel_number: str) -> None:
+        self._run("DELETE FROM director WHERE personnel_number = ?", personnel_number)
+        self._identity.pop(("director", personnel_number), None)
 
 
 class SqliteDrugRepository(SqliteRepository):
@@ -246,6 +298,102 @@ class SqliteBatchRepository(SqliteRepository):
     def find_expiring(self, until: date) -> list[Batch]:
         rows = self._all(f"{self.SELECT} WHERE s.expiry_date <= ? ORDER BY s.expiry_date", until.isoformat())
         return [self.by_id(r["batch_id"]) for r in rows]
+
+    def expiry_of_series(self, trade_name: str, series: str) -> date | None:
+        row = self._one("""SELECT s.expiry_date FROM drug_series s JOIN drug d ON d.drug_id = s.drug_id
+                           WHERE d.trade_name = ? AND s.series = ?""", trade_name, series)
+        return date.fromisoformat(row["expiry_date"]) if row else None
+
+
+class SqliteSupplierRepository(SqliteRepository):
+    def get(self, name: str) -> Supplier | None:
+        key = ("supplier", name)
+        if key in self._identity:
+            return self._identity[key]
+        row = self._one("SELECT * FROM supplier WHERE name = ?", name)
+        if row is None:
+            return None
+        self._identity[key] = Supplier(row["name"], row["phone"])
+        return self._identity[key]
+
+    def id_of(self, name: str) -> int:
+        return self._one("SELECT supplier_id FROM supplier WHERE name = ?", name)["supplier_id"]
+
+    def save(self, supplier: Supplier) -> None:
+        self._run("""INSERT INTO supplier (name, phone) VALUES (?, ?)
+                     ON CONFLICT (name) DO UPDATE SET phone = excluded.phone""", supplier.name, supplier.phone)
+        self._identity[("supplier", supplier.name)] = supplier
+
+    def delete(self, name: str) -> None:
+        self._run("DELETE FROM supplier WHERE name = ?", name)
+        self._identity.pop(("supplier", name), None)
+
+
+class SqliteDeliveryRepository(SqliteRepository):
+    def get(self, invoice_number: str) -> Delivery | None:
+        key = ("delivery", invoice_number)
+        if key in self._identity:
+            return self._identity[key]
+        row = self._one("""SELECT d.*, s.name AS supplier_name FROM delivery d
+                           JOIN supplier s ON s.supplier_id = d.supplier_id WHERE d.invoice_number = ?""",
+                        invoice_number)
+        if row is None:
+            return None
+        batches = [self._uow.batches.by_id(r["batch_id"]) for r in self._all(
+            "SELECT batch_id FROM batch WHERE invoice_number = ? ORDER BY batch_id", invoice_number)]
+        delivery = Delivery(row["invoice_number"], date.fromisoformat(row["delivery_date"]),
+                            self._uow.suppliers.get(row["supplier_name"]), batches)
+        self._identity[key] = delivery
+        return delivery
+
+    def save(self, delivery: Delivery) -> None:
+        self._uow.suppliers.save(delivery.supplier)
+        self._run("""INSERT INTO delivery (invoice_number, delivery_date, supplier_id) VALUES (?, ?, ?)
+                     ON CONFLICT (invoice_number) DO UPDATE SET delivery_date = excluded.delivery_date""",
+                  delivery.invoice_number, delivery.delivery_date.isoformat(),
+                  self._uow.suppliers.id_of(delivery.supplier.name))
+        for batch in delivery.batches:
+            self._uow.batches.save(batch)
+            self._run("UPDATE batch SET invoice_number = ? WHERE batch_id = ?",
+                      delivery.invoice_number, self._uow.batches.id_of(batch))
+        self._identity[("delivery", delivery.invoice_number)] = delivery
+
+    def delete(self, invoice_number: str) -> None:
+        self._run("UPDATE batch SET invoice_number = NULL WHERE invoice_number = ?", invoice_number)
+        self._run("DELETE FROM delivery WHERE invoice_number = ?", invoice_number)
+        self._identity.pop(("delivery", invoice_number), None)
+
+
+class SqliteWriteOffRepository(SqliteRepository):
+    def get(self, number: str) -> WriteOff | None:
+        key = ("write_off", number)
+        if key in self._identity:
+            return self._identity[key]
+        row = self._one("SELECT * FROM write_off WHERE number = ?", number)
+        if row is None:
+            return None
+        manager = self._uow.managers.get(row["personnel_number"])
+        write_off = WriteOff(row["number"], datetime.fromisoformat(row["written_at"]), row["quantity"],
+                             WriteOffReason(row["reason"]), self._uow.batches.by_id(row["batch_id"]), manager)
+        self._identity[key] = write_off
+        return write_off
+
+    def save(self, write_off: WriteOff) -> None:
+        self._run("""INSERT INTO write_off (number, written_at, quantity, reason, batch_id, personnel_number)
+                     VALUES (?, ?, ?, ?, ?, ?)
+                     ON CONFLICT (number) DO UPDATE SET reason = excluded.reason""",
+                  write_off.number, _stamp(write_off.written_at), write_off.quantity, write_off.reason.value,
+                  self._uow.batches.id_of(write_off.batch), write_off.manager.personnel_number)
+        self._identity[("write_off", write_off.number)] = write_off
+
+    def delete(self, number: str) -> None:
+        self._run("DELETE FROM write_off WHERE number = ?", number)
+        self._identity.pop(("write_off", number), None)
+
+    def find_by_pharmacy(self, pharmacy_number: str) -> list[WriteOff]:
+        rows = self._all("""SELECT w.number FROM write_off w JOIN batch b ON b.batch_id = w.batch_id
+                            WHERE b.pharmacy_number = ? ORDER BY w.written_at, w.number""", pharmacy_number)
+        return [self.get(r["number"]) for r in rows]
 
 
 class SqliteCustomerRepository(SqliteRepository):
@@ -438,6 +586,11 @@ class SqliteUnitOfWork:
         self.reservations = SqliteReservationRepository(self)
         self.prescriptions = SqlitePrescriptionRepository(self)
         self.sales = SqliteSaleRepository(self)
+        self.managers = SqliteManagerRepository(self)
+        self.directors = SqliteDirectorRepository(self)
+        self.suppliers = SqliteSupplierRepository(self)
+        self.deliveries = SqliteDeliveryRepository(self)
+        self.write_offs = SqliteWriteOffRepository(self)
 
     @contextmanager
     def transaction(self) -> Iterator[None]:

@@ -1,0 +1,71 @@
+@startuml dcd_warehouse
+title Діаграма класів проєкту: підсистема «Склад і звітність»
+skinparam classAttributeIconSize 0
+
+class ReceiveDeliveryController {
+  +receive(manager, invoice, supplier, lines): DeliveryResult
+}
+class DeliveryValidator {
+  +validated_drugs(pharmacy, lines, today): dict
+}
+class WriteOffController {
+  +write_off(manager, drug, series, reason, qty): WriteOffResult
+}
+class ExpiryController {
+  +expiring(manager, days): list<ExpiringBatch>
+}
+class SalesReportController {
+  +report(user, start, end, pharmacy): SalesReport
+}
+
+class Manager {
+  +personnel_number
+  +may_view(pharmacy): bool
+}
+class Director {
+  +personnel_number
+  +may_view(pharmacy): bool
+}
+class Pharmacy {
+  +expiring_batches(today, days): list<Batch>
+}
+class Batch {
+  +series
+  +expiry_date
+  +quantity
+  +reserved
+  +days_until_expiry(today): int
+  +write_off(quantity)
+}
+class Supplier
+class Delivery {
+  +invoice_number
+  +delivery_date
+}
+class WriteOff {
+  +number
+  +quantity
+  +reason: WriteOffReason
+}
+class SalesReport {
+  +build(start, end, pharmacies, sales)
+}
+class PharmacySalesRow
+class Sale
+
+ReceiveDeliveryController --> DeliveryValidator
+ReceiveDeliveryController ..> Delivery : creates
+ReceiveDeliveryController ..> Batch : creates
+WriteOffController ..> WriteOff : creates
+WriteOffController ..> Batch
+ExpiryController ..> Pharmacy
+SalesReportController ..> SalesReport : creates
+SalesReport *-- PharmacySalesRow
+SalesReport ..> Sale : reads
+Delivery "1" o-- "1..*" Batch
+Supplier "1" -- "*" Delivery
+Pharmacy "1" o-- "*" Batch
+Pharmacy "1" o-- "*" Manager
+WriteOff "*" --> "1" Batch
+WriteOff "*" --> "1" Manager
+@enduml

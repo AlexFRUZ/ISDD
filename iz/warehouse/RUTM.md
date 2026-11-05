@@ -1,0 +1,18 @@
+# Матриця трасування підсистеми «Склад і звітність»
+
+| Вимога | UC10 | UC11 | UC12 | UC13 | Автоматична перевірка |
+|---|---:|---:|---:|---:|---|
+| R9 | X |  |  |  | `tests/test_warehouse_subsystem.py::test_uc10_*` |
+| R9.1 | X |  |  |  | `tests/test_warehouse_subsystem.py::test_uc10_flow_3a_duplicate_invoice` |
+| R9.2 | X |  |  |  | `tests/test_warehouse_subsystem.py::test_uc10_expiry_boundary_*, test_uc10_flow_5a_*, test_uc10_flow_5b_*` |
+| R9.3 | X |  |  |  | `tests/test_warehouse_subsystem.py::test_uc10_rejected_line_leaves_no_partial_delivery` |
+| R10 |  | X |  |  | `tests/test_warehouse_subsystem.py::test_uc11_*` |
+| R10.1 |  | X |  |  | `tests/test_warehouse_subsystem.py::test_uc11_reserved_quantity_*, test_uc11_quantity_boundary` |
+| R10.2 |  | X |  |  | `tests/test_warehouse_subsystem.py::test_uc11_writes_off_*, test_uc11_flow_4a_*` |
+| R11 |  |  |  | X | `tests/test_warehouse_subsystem.py::test_uc13_*` |
+| R11.1 |  |  |  | X | `tests/test_warehouse_subsystem.py::test_uc13_manager_*` |
+| R11.2 |  |  |  | X | `tests/test_warehouse_subsystem.py::test_uc13_period_includes_both_boundary_days_completely` |
+| R13 |  |  | X |  | `tests/test_warehouse_subsystem.py::test_uc12_*` |
+| R13.1 |  |  | X |  | `tests/test_warehouse_subsystem.py::test_uc12_includes_expired_*, test_uc12_hides_*` |
+
+Порожніх рядків і стовпців немає. Повна матриця проєкту зберігається в `lab3/RUTM.md`.

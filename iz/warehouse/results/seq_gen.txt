@@ -1,0 +1,12 @@
+Учасників: 7, повідомлень: 12, фрагментів: 0
+Перевірку правила Kung пройдено
+Збережено: ../iz/warehouse/diagrams/uc10_receive_delivery.puml
+Учасників: 6, повідомлень: 11, фрагментів: 0
+Перевірку правила Kung пройдено
+Збережено: ../iz/warehouse/diagrams/uc11_write_off.puml
+Учасників: 6, повідомлень: 8, фрагментів: 0
+Перевірку правила Kung пройдено
+Збережено: ../iz/warehouse/diagrams/uc12_expiry.puml
+Учасників: 6, повідомлень: 10, фрагментів: 0
+Перевірку правила Kung пройдено
+Збережено: ../iz/warehouse/diagrams/uc13_sales_report.puml

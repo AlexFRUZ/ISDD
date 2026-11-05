@@ -5,8 +5,8 @@ from datetime import date, datetime
 from typing import Protocol, TypeVar
 
 from pharmacy.domain import (
-    Batch, Customer, Drug, EPrescription, Pharmacist, Pharmacy, PharmacyChain,
-    PrescriptionState, Reservation, Sale,
+    Batch, Customer, Delivery, Director, Drug, EPrescription, Manager, Pharmacist, Pharmacy,
+    PharmacyChain, PrescriptionState, Reservation, Sale, Supplier, WriteOff,
 )
 
 Entity = TypeVar("Entity")
@@ -36,6 +36,27 @@ class DrugRepository(Repository[Drug, str], Protocol):
 
 class BatchRepository(Repository[Batch, BatchKey], Protocol):
     def find_expiring(self, until: date) -> list[Batch]: ...
+    def expiry_of_series(self, trade_name: str, series: str) -> date | None: ...
+
+
+class ManagerRepository(Repository[Manager, str], Protocol):
+    pass
+
+
+class DirectorRepository(Repository[Director, str], Protocol):
+    pass
+
+
+class SupplierRepository(Repository[Supplier, str], Protocol):
+    pass
+
+
+class DeliveryRepository(Repository[Delivery, str], Protocol):
+    pass
+
+
+class WriteOffRepository(Repository[WriteOff, str], Protocol):
+    def find_by_pharmacy(self, pharmacy_number: str) -> list[WriteOff]: ...
 
 
 class CustomerRepository(Repository[Customer, str], Protocol):
@@ -64,6 +85,11 @@ class UnitOfWork(Protocol):
     reservations: ReservationRepository
     prescriptions: PrescriptionRepository
     sales: SaleRepository
+    managers: ManagerRepository
+    directors: DirectorRepository
+    suppliers: SupplierRepository
+    deliveries: DeliveryRepository
+    write_offs: WriteOffRepository
 
     def transaction(self) -> AbstractContextManager[None]: ...
     def next_number(self, kind: str) -> int: ...

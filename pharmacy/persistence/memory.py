@@ -9,7 +9,7 @@ from datetime import date, datetime
 
 from pharmacy.domain import (
     Batch, Drug, EPrescription, Pharmacist, Pharmacy, PharmacyChain,
-    PrescriptionState, Reservation, Sale,
+    PrescriptionState, Reservation, Sale, WriteOff,
 )
 
 
@@ -24,6 +24,11 @@ class MemoryData:
     reservations: dict = field(default_factory=dict)
     prescriptions: dict = field(default_factory=dict)
     sales: dict = field(default_factory=dict)
+    managers: dict = field(default_factory=dict)
+    directors: dict = field(default_factory=dict)
+    suppliers: dict = field(default_factory=dict)
+    deliveries: dict = field(default_factory=dict)
+    write_offs: dict = field(default_factory=dict)
     counters: dict = field(default_factory=lambda: defaultdict(int))
 
 
@@ -75,6 +80,24 @@ class MemoryBatchRepository(MemoryRepository):
         return sorted((b for b in self._items.values() if b.expiry_date <= until),
                       key=lambda b: b.expiry_date)
 
+    def expiry_of_series(self, trade_name: str, series: str) -> date | None:
+        return next((b.expiry_date for b in self._items.values()
+                     if b.drug.trade_name == trade_name and b.series == series), None)
+
+
+class MemoryDeliveryRepository(MemoryRepository):
+    def save(self, delivery) -> None:
+        self._uow.suppliers.save(delivery.supplier)
+        for batch in delivery.batches:
+            self._uow.batches.save(batch)
+        super().save(delivery)
+
+
+class MemoryWriteOffRepository(MemoryRepository):
+    def find_by_pharmacy(self, pharmacy_number: str) -> list[WriteOff]:
+        return sorted((w for w in self._items.values() if w.batch.pharmacy.number == pharmacy_number),
+                      key=lambda w: w.number)
+
 
 class MemoryReservationRepository(MemoryRepository):
     def find_active_by_customer(self, phone: str) -> list[Reservation]:
@@ -109,6 +132,11 @@ class MemoryUnitOfWork:
         self.reservations = MemoryReservationRepository(self, "reservations", lambda r: r.code)
         self.prescriptions = MemoryPrescriptionRepository(self, "prescriptions", lambda p: p.number)
         self.sales = MemorySaleRepository(self, "sales", lambda s: s.number)
+        self.managers = MemoryRepository(self, "managers", lambda m: m.personnel_number)
+        self.directors = MemoryRepository(self, "directors", lambda d: d.personnel_number)
+        self.suppliers = MemoryRepository(self, "suppliers", lambda s: s.name)
+        self.deliveries = MemoryDeliveryRepository(self, "deliveries", lambda d: d.invoice_number)
+        self.write_offs = MemoryWriteOffRepository(self, "write_offs", lambda w: w.number)
 
     @contextmanager
     def transaction(self) -> Iterator[None]:

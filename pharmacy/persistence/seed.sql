@@ -12,6 +12,11 @@ INSERT INTO pharmacist VALUES
   ('Ф-9', 'Ткач Світлана', 'А-03'), ('Ф-10', 'Савчук Андрій', 'А-04'),
   ('Ф-11', 'Кравець Оксана', 'А-05');
 
+INSERT INTO manager VALUES
+  ('З-1', 'Данилюк Тетяна', 'А-01'), ('З-2', 'Приходько Максим', 'А-02'),
+  ('З-3', 'Мазур Наталія', 'А-03'), ('З-4', 'Руденко Василь', 'А-04'), ('З-5', 'Гордієнко Алла', 'А-05');
+INSERT INTO director VALUES ('Д-1', 'Лановий Сергій');
+
 INSERT INTO drug VALUES
   (1, 'Амоксил', 'Amoxicillin', 'таблетки', '500 мг', 'Київмедпрепарат'),
   (2, 'Актрапід', 'Insulin', 'ампули', '100 МО/мл', 'Ново Нордіск'),
@@ -78,4 +83,4 @@ INSERT INTO sale VALUES
 INSERT INTO sale_line VALUES
   ('Ч-1', 4, 1, 3550), ('Ч-2', 6, 1, 5200), ('Ч-3', 7, 1, 7000), ('Ч-4', 5, 1, 3000), ('Ч-5', 6, 2, 5200);
 
-INSERT INTO sequence VALUES ('sale', 5), ('reservation', 5);
+INSERT INTO sequence VALUES ('sale', 5), ('reservation', 5), ('write_off', 0);

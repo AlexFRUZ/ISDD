@@ -1,0 +1,12 @@
+Name                                                            Stmts   Miss Branch BrPart  Cover
+-------------------------------------------------------------------------------------------------
+pharmacy/controllers/warehouse/__init__.py                          6      0      0      0   100%
+pharmacy/controllers/warehouse/common.py                           25      0      4      0   100%
+pharmacy/controllers/warehouse/delivery_validator.py               36      0     10      0   100%
+pharmacy/controllers/warehouse/expiry_controller.py                30      0      0      0   100%
+pharmacy/controllers/warehouse/receive_delivery_controller.py      42      0      4      0   100%
+pharmacy/controllers/warehouse/sales_report_controller.py          29      0     10      0   100%
+pharmacy/controllers/warehouse/write_off_controller.py             44      0      6      0   100%
+pharmacy/domain/report.py                                          40      0      4      0   100%
+-------------------------------------------------------------------------------------------------
+TOTAL                                                             252      0     38      0   100%

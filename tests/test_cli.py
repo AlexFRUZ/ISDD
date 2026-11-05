@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 import pytest
 
 from pharmacy.ui import cli
@@ -92,3 +94,46 @@ def test_verify_recipe_command(run):
 def test_verify_recipe_registry_down(run):
     code, out = run("verify-recipe", "--recipe", "E-100", "--registry-down")
     assert code == 1 and "потік 2a" in out
+
+
+def test_receive_then_expiring_and_write_off(run):
+    soon = (date.today() + timedelta(days=10)).isoformat()
+    code, out = run("receive", "--manager", "З-1", "--invoice", "Н-10", "--supplier", "Оптима-Фарм",
+                    "--line", f"Парацетамол;PA-2;{soon};20;35.50;30")
+    assert code == 0 and "Поставку Н-10" in out and "разом 30 уп" in out
+    code, out = run("expiring", "--manager", "З-1")
+    assert code == 0 and "PA-2" in out and "PA-0" in out
+    code, out = run("write-off", "--manager", "З-1", "--drug", "Парацетамол", "--series", "PA-2",
+                    "--reason", "пошкодження", "--qty", "10")
+    assert code == 0 and "Акт С-1" in out and "Залишок 20 уп" in out
+    assert run("receive", "--manager", "З-1", "--invoice", "Н-10", "--supplier", "Оптима-Фарм",
+               "--line", "Парацетамол;PA-3;2030-01-01;1;2;3")[1].startswith("Відмова (потік 3a)")
+
+
+def test_receive_rejects_malformed_line(run):
+    code, out = run("receive", "--manager", "З-1", "--invoice", "Н-11", "--supplier", "Оптима-Фарм", "--line", "x;y")
+    assert code == 1 and "шість полів" in out
+    code, out = run("receive", "--manager", "З-1", "--invoice", "Н-11", "--supplier", "Оптима-Фарм",
+                    "--line", "Парацетамол;PA-2;вчора;20;35;3")
+    assert code == 1 and "некоректну" in out
+
+
+def test_expiring_prints_empty_message(run):
+    code, out = run("expiring", "--manager", "З-3", "--days", "0")
+    assert code == 0 and "немає" in out
+
+
+def test_sales_report_for_director_and_manager(run):
+    run("sell-otc", "--pharmacist", "Ф-7", "--drug", "Парацетамол", "--qty", "2")
+    today = date.today().isoformat()
+    code, out = run("sales-report", "--user", "Д-1", "--from", today, "--to", today)
+    assert code == 0 and "А-01" in out and "Разом: чеків 1, упаковок 2" in out
+    code, out = run("sales-report", "--user", "З-2", "--from", today, "--to", today)
+    assert code == 0 and "А-01" not in out and "Разом: чеків 0" in out
+
+
+def test_sales_report_refusals(run):
+    assert "потік 4b" in run("sales-report", "--user", "З-1", "--from", "2026-01-01", "--to", "2026-01-02",
+                             "--pharmacy", "А-02")[1]
+    code, out = run("sales-report", "--user", "Д-1", "--from", "2026/01/01", "--to", "2026-01-02")
+    assert code == 1 and "РРРР-ММ-ДД" in out

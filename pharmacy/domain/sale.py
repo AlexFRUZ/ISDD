@@ -35,6 +35,14 @@ class Sale:
     pricing: PricingPolicy = field(default_factory=StandardPricing, repr=False)
 
     @property
+    def pharmacy(self):
+        return self.pharmacist.pharmacy
+
+    @property
+    def packs(self) -> int:
+        return sum(line.quantity for line in self.lines)
+
+    @property
     def subtotal(self) -> Decimal:
         return sum((line.amount for line in self.lines), Decimal("0"))
 

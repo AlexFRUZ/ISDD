@@ -42,6 +42,9 @@ class Batch:
     def is_expired(self, today: date) -> bool:
         return self.expiry_date <= today
 
+    def days_until_expiry(self, today: date) -> int:
+        return (self.expiry_date - today).days
+
     def has_shelf_life_for_reservation(self, today: date) -> bool:
         return self.expiry_date - today >= timedelta(days=MIN_SHELF_LIFE_DAYS)
 
@@ -71,3 +74,12 @@ class Batch:
         require(not self.is_expired(today), f"Партія {self.series}: строк придатності минув")
         require(quantity <= self.available, f"Партія {self.series}: доступно лише {self.available} уп.")
         self.quantity -= quantity
+
+    @keeps_invariant
+    def write_off(self, quantity: int) -> None:
+        require(quantity > 0, "Кількість має бути додатною")
+        require(quantity <= self.available,
+                f"Партія {self.series}: можна списати лише {self.available} уп. (решта зарезервована)")
+        quantity_before = self.quantity
+        self.quantity -= quantity
+        ensure(self.quantity == quantity_before - quantity, "залишок партії зменшено на списану кількість")

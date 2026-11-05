@@ -1,5 +1,5 @@
 from pharmacy.domain.batch import MIN_SHELF_LIFE_DAYS, Batch
-from pharmacy.domain.chain import Pharmacist, Pharmacy, PharmacyChain
+from pharmacy.domain.chain import Director, Manager, Pharmacist, Pharmacy, PharmacyChain
 from pharmacy.domain.customer import Customer
 from pharmacy.domain.drug import Drug, OtcDrug, PrescriptionDrug
 from pharmacy.domain.prescription import (
@@ -11,11 +11,12 @@ from pharmacy.domain.reservation import (
 )
 from pharmacy.domain.pricing import LoyaltyPricing, PricingPolicy, ReimbursedPricing, StandardPricing
 from pharmacy.domain.sale import PaymentMethod, Sale, SaleLine
-from pharmacy.domain.supply import Delivery, Supplier
+from pharmacy.domain.report import PharmacySalesRow, SalesReport
+from pharmacy.domain.supply import Delivery, Supplier, WriteOff, WriteOffReason
 from pharmacy.foundation.errors import ContractError, DomainError, TransitionError
 
 __all__ = [
-    "Batch", "Customer", "Delivery", "Doctor", "DomainError", "Drug", "EPrescription",
+    "Batch", "Customer", "Delivery", "Director", "Doctor", "Manager", "PharmacySalesRow", "SalesReport", "WriteOff", "WriteOffReason", "DomainError", "Drug", "EPrescription",
     "MAX_ACTIVE_RESERVATIONS", "MAX_RESERVATION_QUANTITY", "MIN_RESERVATION_QUANTITY",
     "MIN_SHELF_LIFE_DAYS", "OtcDrug", "PRESCRIPTION_VALID_DAYS", "PaymentMethod", "Pharmacist",
     "Pharmacy", "PharmacyChain", "PrescriptionDrug", "PrescriptionState", "RESERVATION_HOURS",

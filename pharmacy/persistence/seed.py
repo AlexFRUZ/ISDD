@@ -4,8 +4,8 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from pharmacy.domain import (
-    Batch, Doctor, EPrescription, OtcDrug, Pharmacist, Pharmacy, PharmacyChain,
-    PrescriptionDrug, PrescriptionState,
+    Batch, Director, Doctor, EPrescription, Manager, OtcDrug, Pharmacist, Pharmacy, PharmacyChain,
+    PrescriptionDrug, PrescriptionState, Supplier,
 )
 from pharmacy.persistence.repositories import UnitOfWork
 
@@ -33,6 +33,10 @@ def populate(uow: UnitOfWork, today: date) -> None:
         uow.batches.save(batch)
 
     uow.pharmacists.save(Pharmacist("Ф-7", "Бойко Ірина", first))
+    uow.managers.save(Manager("З-1", "Данилюк Тетяна", first))
+    uow.managers.save(Manager("З-2", "Приходько Максим", second))
+    uow.directors.save(Director("Д-1", "Лановий Сергій"))
+    uow.suppliers.save(Supplier("Оптима-Фарм", "+380441110001"))
 
     doctor = Doctor("Коваль Петро", "терапевт")
     recipes = [

@@ -19,6 +19,17 @@ CREATE TABLE pharmacist (
     pharmacy_number  TEXT NOT NULL REFERENCES pharmacy (number)
 );
 
+CREATE TABLE manager (
+    personnel_number TEXT PRIMARY KEY,
+    full_name        TEXT NOT NULL,
+    pharmacy_number  TEXT NOT NULL REFERENCES pharmacy (number)
+);
+
+CREATE TABLE director (
+    personnel_number TEXT PRIMARY KEY,
+    full_name        TEXT NOT NULL
+);
+
 CREATE TABLE drug (
     drug_id      INTEGER PRIMARY KEY,
     trade_name   TEXT NOT NULL UNIQUE,
@@ -69,6 +80,16 @@ CREATE TABLE batch (
     reserved           INTEGER NOT NULL DEFAULT 0 CHECK (reserved BETWEEN 0 AND quantity),
     FOREIGN KEY (drug_id, series) REFERENCES drug_series (drug_id, series),
     UNIQUE (drug_id, series, pharmacy_number)
+);
+
+CREATE TABLE write_off (
+    number           TEXT PRIMARY KEY,
+    written_at       TEXT NOT NULL,
+    quantity         INTEGER NOT NULL CHECK (quantity >= 1),
+    reason           TEXT NOT NULL CHECK (reason IN ('строк придатності минув', 'пошкодження',
+                                                     'брак виробника', 'інша причина')),
+    batch_id         INTEGER NOT NULL REFERENCES batch (batch_id),
+    personnel_number TEXT NOT NULL REFERENCES manager (personnel_number)
 );
 
 CREATE TABLE customer (

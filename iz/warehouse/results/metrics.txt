@@ -1,0 +1,14 @@
+Клас                           метод. атриб.  DIT  fan-in  fan-out  рішень
+Director                            1      2    0       2        1       0
+Manager                             1      3    0       5        1       1
+DeliveryValidator                   5      1    0       1        5       7
+ExpiryController                    1      2    0       1        2       1
+ReceiveDeliveryController           1      3    0       1        7       8
+SalesReport                         4      3    0       1        3       8
+DirectorRepository                  0      0    0       1        2       0
+ManagerRepository                   0      0    0       1        2       0
+SalesReportController               2      1    0       1        4       8
+WriteOff                            0      6    0       4        4       1
+WriteOffController                  1      2    0       1        5       8
+УВАГА: ReceiveDeliveryController – fan-out 7 (> 5)
+УВАГА: Batch – методів 11 (> 10)

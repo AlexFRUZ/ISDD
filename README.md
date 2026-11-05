@@ -26,7 +26,7 @@
 lab1/ ... lab7/   артефакти, програми-інструменти й тести кожної роботи
 pharmacy/         застосунок, створений у ЛР 5 і розвинений у ЛР 6–7
   ui/             консольний інтерфейс
-  controllers/    окремі пакети підсистем «Резервування» і «Продаж»
+  controllers/    окремі пакети підсистем «Резервування», «Продаж» і «Склад і звітність»
   network/        шлюз до реєстру е-рецептів
   persistence/    репозиторії (пам'ять і SQLite), schema.sql, seed.sql
   domain/         доменні класи, машина станів, ціноутворення
@@ -34,6 +34,7 @@ pharmacy/         застосунок, створений у ЛР 5 і розв
 tests/            тести застосунку
 iz/reservation/   індивідуальне завдання: підсистема «Резервування» (Гладун Олександр)
 iz/sales/         індивідуальне завдання: підсистема «Продаж» (UC6–UC9)
+iz/warehouse/     індивідуальне завдання: підсистема «Склад і звітність» (UC10–UC13)
 tools/            рендеринг діаграм
 ```
 
@@ -64,6 +65,13 @@ python -m venv .venv
 .venv/bin/python -m pharmacy.ui.cli sell --pharmacist Ф-7 --recipe E-100 --qty 1
 .venv/bin/python -m pharmacy.ui.cli sell-otc --pharmacist Ф-7 --drug Парацетамол --qty 2
 .venv/bin/python -m pharmacy.ui.cli verify-recipe --recipe E-101
+
+# UC10–UC13: завідувач аптеки З-1 (А-01), директор мережі Д-1
+.venv/bin/python -m pharmacy.ui.cli receive --manager З-1 --invoice Н-10 --supplier Оптима-Фарм \
+    --line "Парацетамол;PA-2;2030-12-31;20;35.50;30"
+.venv/bin/python -m pharmacy.ui.cli write-off --manager З-1 --drug Парацетамол --series PA-0 --reason "строк придатності минув"
+.venv/bin/python -m pharmacy.ui.cli expiring --manager З-1 --days 30
+.venv/bin/python -m pharmacy.ui.cli sales-report --user Д-1 --from 2026-11-01 --to 2026-11-30
 ```
 
 Покриття коду:
