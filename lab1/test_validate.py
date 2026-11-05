@@ -1,4 +1,3 @@
-"""Тести валідатора та моделі специфікації (ЛР 1, завдання 3)."""
 from pathlib import Path
 
 import pytest
@@ -22,8 +21,6 @@ def req(req_id="R1", text="ІС повинна зберігати дані пр�
 def kinds(defects):
     return {d.kind for d in defects}
 
-
-# --- Обов'язкові перевірки таблиці 1.3 -------------------------------------------
 
 @pytest.mark.parametrize("bad_id", ["REQ-1", "R", "R1.", "1", "X1", "N1.1"])
 def test_check1_id_format(bad_id):
@@ -60,7 +57,6 @@ def test_check4_vague_words(word):
 
 
 def test_check4_stem_only_at_word_start():
-    # «незручний» не збігається з основою на початку слова, тому не є дефектом цієї перевірки.
     assert v.check_vague_words(make_spec(req(text="ІС повинна блокувати незручний запит."))) == []
 
 
@@ -121,8 +117,6 @@ def test_check8_different_texts():
     assert v.check_similar(make_spec(first, second)) == []
 
 
-# --- Власні перевірки -------------------------------------------------------------
-
 @pytest.mark.parametrize("text", ["ІС повинна мати кнопку.", "ІС повинна показати це на сторінці.",
                                   "ІС повинна писати в таблицю.", "ІС повинна працювати з MySQL."])
 def test_check9_implementation_words(text):
@@ -159,8 +153,6 @@ def test_check13_regulated_priority():
     assert [d.req_id for d in v.check_regulated_priority(make_spec(low, high))] == ["R1"]
 
 
-# --- Цілісні перевірки ------------------------------------------------------------
-
 def test_working_spec_is_clean():
     assert v.validate(load_spec(HERE / "srs.yaml")) == []
 
@@ -196,4 +188,4 @@ def test_report_structure():
     report = srs_report.build_report(load_spec(HERE / "srs.yaml"))
     assert "## 1. Вступ" in report and "## 2. Загальний опис" in report
     assert "## 3. Специфічні вимоги" in report and "## 4. Статистика вимог" in report
-    assert "  - **R2.1** *(пріоритет 1)*" in report  # підвимога з відступом під батьківською
+    assert "  - **R2.1** *(пріоритет 1)*" in report

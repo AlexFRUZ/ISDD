@@ -15,9 +15,9 @@ title: Архітектурне проєктування багаторівне�
 
 ## 2. Завдання 1. Цілі, тип системи та архітектурний стиль
 
-<!-- md: design_goals.md -->
+@include md: design_goals.md
 
-<!-- md: adr/ADR-001.md -->
+@include md: adr/ADR-001.md
 
 ## 3. Завдання 2. Діаграма пакетів і каркас застосунку
 
@@ -50,7 +50,7 @@ tests/                                   тести контролерів і д
 інтерфейс отримує від контролерів лише прості результати `ReservationResult` і `SaleResult`.
 Контролери отримують сховище й реєстр через конструктор:
 
-<!-- py@lab5: ../pharmacy/controllers/prescription_sale_controller.py PrescriptionSaleController.sell -->
+@include py@lab5: ../pharmacy/controllers/prescription_sale_controller.py PrescriptionSaleController.sell
 
 ### 3.3 Робота двох варіантів використання
 
@@ -58,7 +58,7 @@ tests/                                   тести контролерів і д
 запусками консольної програми. Тому другий продаж за рецептом E-100 отримує відмову: рецепт уже
 погашено.
 
-<!-- txt: results/cli_demo.txt -->
+@include txt: results/cli_demo.txt
 
 Вебінтерфейс (додаткове завдання) не реалізовувався.
 
@@ -67,32 +67,32 @@ tests/                                   тести контролерів і д
 Контролери тестуються без інтерфейсу користувача. Час передається як залежність, тому тести
 детерміновані.
 
-<!-- py@lab5: ../tests/test_controllers.py test_sale_registry_down_changes_nothing -->
+@include py@lab5: ../tests/test_controllers.py test_sale_registry_down_changes_nothing
 
-<!-- txt: results/pytest_tests.txt -->
+@include txt: results/pytest_tests.txt
 
 ## 4. Завдання 3. Перевірка архітектурних обмежень
 
 ### 4.1 Правила
 
-<!-- txt: layers.yaml yaml -->
+@include txt: layers.yaml yaml
 
 ### 4.2 Програма arch_check.py
 
 Програма обходить модулі, за допомогою `ast` знаходить `import` і `from ... import`, зокрема
 відносні й усередині функцій, визначає рівні й порівнює їх із правилами.
 
-<!-- py: arch_check.py find_violations -->
+@include py: arch_check.py find_violations
 
 Цикли між пакетами шукає пошук у глибину:
 
-<!-- py: arch_check.py find_cycles -->
+@include py: arch_check.py find_cycles
 
 ### 4.3 Порівняння задуманої й фактичної архітектури
 
 Перший запуск:
 
-<!-- txt: results/arch_first_run.txt -->
+@include txt: results/arch_first_run.txt
 
 Заборонених залежностей і циклів немає, але на задуманій діаграмі були залежності
 `network -> foundation` і `persistence -> foundation`, яких код не використовує. Рівень
@@ -105,29 +105,29 @@ tests/                                   тести контролерів і д
 
 Запуск після вирівнювання:
 
-<!-- txt: results/arch_ok.txt -->
+@include txt: results/arch_ok.txt
 
 ### 4.4 Свідоме порушення
 
 До `domain/sale.py` додано рядок `from pharmacy.ui import cli`. Програма виявила заборонену
 залежність і цикл, який вона створила:
 
-<!-- txt: results/arch_violation.txt -->
+@include txt: results/arch_violation.txt
 
 Програму підключено як тест `test_project_respects_architecture`, тому з таким імпортом падають
 і тести:
 
-<!-- txt: results/arch_pytest_violation.txt -->
+@include txt: results/arch_pytest_violation.txt
 
 Після видалення імпорту всі тести знову проходять:
 
-<!-- txt: results/pytest_arch.txt -->
+@include txt: results/pytest_arch.txt
 
 ### 4.5 Огляд архітектури
 
-<!-- md: architecture_review.md -->
+@include md: architecture_review.md
 
-<!-- md: adr/ADR-002.md -->
+@include md: adr/ADR-002.md
 
 ## 5. Відповіді на контрольні питання
 

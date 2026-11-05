@@ -195,7 +195,6 @@ def test_sale_registry_down_changes_nothing(ctx):
 ### 4.1 Правила
 
 ```yaml
-# Архітектурні правила ІС «Мережа аптек». Рівні перелічено згори донизу.
 package: pharmacy
 layers:
   - ui
@@ -211,7 +210,6 @@ allowed:
   persistence: [domain]
   domain: [foundation]
   foundation: []
-# Сторонні модулі, які рівню заборонено імпортувати.
 forbidden_modules:
   domain: [sqlite3, argparse, pickle, json, flask, fastapi]
   foundation: [sqlite3, argparse, pickle, flask, fastapi]
@@ -247,7 +245,6 @@ def find_violations(imports: list[Import], rules: dict) -> list[Violation]:
 
 ```python
 def find_cycles(graph: dict[str, set[str]]) -> list[list[str]]:
-    """Пошук у глибину: ребро до вершини на поточному шляху замикає цикл."""
     cycles: list[list[str]] = []
     visited: set[str] = set()
 

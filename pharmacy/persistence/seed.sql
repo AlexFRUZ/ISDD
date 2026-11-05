@@ -1,4 +1,3 @@
--- Демонстраційні дані. Дати відносні, тому рецепти чинні в день створення бази.
 INSERT INTO pharmacy_chain VALUES (1, 'Мережа аптек', '12345678');
 
 INSERT INTO pharmacy VALUES

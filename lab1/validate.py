@@ -1,10 +1,3 @@
-"""Автоматизоване рецензування якості вимог (ЛР 1, завдання 3).
-
-Запуск: python validate.py srs.yaml
-Код завершення: 0 - дефектів немає, 1 - дефекти знайдено, 2 - помилка запуску.
-
-Перевірки 1-8 обов'язкові (таблиця 1.3 методичних рекомендацій), 9-13 власні.
-"""
 from __future__ import annotations
 
 import re
@@ -21,13 +14,11 @@ ALLOWED_TYPES = {"functional", "operational", "performance", "security", "cultur
 NON_FUNCTIONAL_TYPES = {"operational", "performance", "security", "cultural"}
 OPENINGS = ("іс повинна", "система повинна")
 
-# Основи слів: так одним записом покриваються всі відмінкові форми.
 VAGUE_STEMS = (
     "швидк", "зручн", "легк", "тощо", "ефективн", "оптимальн", "інтуїтивн",
     "гнучк", "сучасн", "приблизн", "зрозумі", "достатн", "якісн",
 )
 IMPLEMENTATION_WORDS = ("кнопк", "кнопц", "таблиц", "сторінк", "сторінц", "mysql", "sqlite", "клас ", "вікн")
-# Вимоги з цими темами регулюються законом, тому не можуть мати низький пріоритет.
 REGULATED_STEMS = ("рецепт", "персональн")
 MAX_REGULATED_PRIORITY = 2
 SIMILARITY_THRESHOLD = 0.85
@@ -44,12 +35,10 @@ class Defect:
 
 
 def normalize(text: str) -> str:
-    """Регістр і пробіли не мають впливати на порівняння текстів."""
     return " ".join(text.lower().split())
 
 
 def _find_stem(text: str, stems: tuple[str, ...]) -> str | None:
-    """Шукає основу на початку слова, щоб «незручно» не збігалося із «зручн»."""
     for stem in stems:
         if re.search(rf"\b{re.escape(stem)}", text):
             return stem
@@ -104,7 +93,6 @@ def check_priorities(spec: Specification) -> list[Defect]:
     for req in spec.requirements:
         if req.type == "constraint":
             continue
-        # bool є підкласом int, тому True інакше сприймався б як пріоритет 1.
         valid = isinstance(req.priority, int) and not isinstance(req.priority, bool)
         if not valid or not 1 <= req.priority <= 5:
             defects.append(Defect(req.id, "пріоритет", "пріоритет має бути 1..5"))
@@ -136,7 +124,6 @@ def check_similar(spec: Specification) -> list[Defect]:
 
 
 def check_implementation_words(spec: Specification) -> list[Defect]:
-    """Власна перевірка 9. Обмеження можуть називати технології, а вимоги ні."""
     defects = []
     for req in spec.requirements:
         if req.type == "constraint":
@@ -148,7 +135,6 @@ def check_implementation_words(spec: Specification) -> list[Defect]:
 
 
 def check_user_story_coverage(spec: Specification) -> list[Defect]:
-    """Власна перевірка 10. Кожна user story має породжувати хоча б одну вимогу."""
     sources = " ".join(r.source for r in spec.requirements)
     return [
         Defect(s.id, "неповнота", "історію не згадано в джерелах вимог")
@@ -157,7 +143,6 @@ def check_user_story_coverage(spec: Specification) -> list[Defect]:
 
 
 def check_id_prefix_matches_type(spec: Specification) -> list[Defect]:
-    """Власна перевірка 11. Префікс ID узгоджений з типом; обмеження без пріоритету."""
     defects = []
     for req in spec.requirements:
         prefix = req.id[:1]
@@ -174,7 +159,6 @@ def check_id_prefix_matches_type(spec: Specification) -> list[Defect]:
 
 
 def check_sources(spec: Specification) -> list[Defect]:
-    """Власна перевірка 12. Вимога без джерела нетрасована до стейкхолдера."""
     return [
         Defect(r.id, "нетрасованість", "не вказано джерело вимоги")
         for r in spec.requirements if not r.source
@@ -182,7 +166,6 @@ def check_sources(spec: Specification) -> list[Defect]:
 
 
 def check_regulated_priority(spec: Specification) -> list[Defect]:
-    """Власна перевірка 13 (предметна). Рецепти й персональні дані регулює закон."""
     defects = []
     for req in spec.requirements:
         if req.type == "constraint" or not isinstance(req.priority, int):

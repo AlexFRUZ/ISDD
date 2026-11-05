@@ -241,8 +241,6 @@ class Repository(Protocol[Entity, Key]):
 
 ```python
 class UnitOfWork(Protocol):
-    """Набір репозиторіїв, які змінюються в одній транзакції."""
-
     pharmacies: PharmacyRepository
     pharmacists: PharmacistRepository
     drugs: DrugRepository
@@ -288,14 +286,13 @@ SQLite доповнює карта ідентичності: один рядок
 ```python
 @contextmanager
 def transaction(self) -> Iterator[None]:
-    """Усі зміни всередині блоку фіксуються разом або відкочуються разом."""
     self.clear()
     self.connection.execute("BEGIN")
     try:
         yield
     except BaseException:
         self.connection.execute("ROLLBACK")
-        self.clear()  # об'єкти в пам'яті могли змінитися, а база вже ні
+        self.clear()
         raise
     self.connection.execute("COMMIT")
 ```
@@ -303,11 +300,10 @@ def transaction(self) -> Iterator[None]:
 ```python
 def sell(self, pharmacist_number: str, recipe_number: str, quantity: int,
          payment: str = "картка") -> SaleResult:
-    """Контракт: lab6/contracts.md, контракт 1."""
     require(quantity >= 1, "Кількість має бути додатною")
     now = self.clock()
     today = now.date()
-    with self.uow.transaction():  # продаж, партія й рецепт змінюються разом
+    with self.uow.transaction():
         pharmacist = self._pharmacist(pharmacist_number)
         recipe = self._valid_recipe(recipe_number, today)
         if not recipe.allows_quantity(quantity):

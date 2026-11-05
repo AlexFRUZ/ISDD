@@ -1,4 +1,3 @@
-"""Тести контрактів: дотримання й порушення кожної передумови та інваріанта (ЛР 6)."""
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from decimal import Decimal
@@ -37,8 +36,6 @@ def customer():
 def pharmacist(pharmacy):
     return d.Pharmacist("Ф-7", "Бойко Ірина", pharmacy)
 
-
-# --- Допоміжні функції контрактів --------------------------------------------------
 
 def test_require_passes_and_fails():
     require(True, "ok")
@@ -85,8 +82,6 @@ def test_keeps_invariant_restores_state_after_violation():
     assert account.balance == 10 and account.history == []
 
 
-# --- Batch: інваріанти -------------------------------------------------------------
-
 def test_batch_invariant_holds_after_creation(batch):
     batch.check_invariant()
 
@@ -96,8 +91,6 @@ def test_batch_invariant_violation(drug, pharmacy, quantity, reserved):
     with pytest.raises(d.ContractError):
         d.Batch("S-2", FAR, Decimal("1"), Decimal("2"), quantity, drug, pharmacy, reserved)
 
-
-# --- Batch.block: передумови й постумови -------------------------------------------
 
 def test_block_keeps_physical_stock(batch):
     batch.block(3)
@@ -131,8 +124,6 @@ def test_write_off_precondition_for_reserved_stock(batch):
     with pytest.raises(d.ContractError, match="доступно лише 0"):
         batch.write_off_sold(1, TODAY)
 
-
-# --- Customer і Reservation --------------------------------------------------------
 
 def test_create_reservation_adds_to_customer(customer, batch):
     reservation = customer.create_reservation("R-1", NOW, 1, batch)
@@ -178,8 +169,6 @@ def test_failed_creation_through_customer_leaves_no_reservation(customer, batch,
     assert customer.reservations == []
 
 
-# --- Sale --------------------------------------------------------------------------
-
 def test_sale_invariant_holds(pharmacist, batch):
     sale = d.Sale("Ч-1", NOW, d.PaymentMethod.CARD, pharmacist)
     sale.add_line(batch, 2)
@@ -207,8 +196,6 @@ def test_sale_line_quantity_invariant(pharmacist, batch):
     with pytest.raises(d.ContractError, match="додатною"):
         d.SaleLine(0, Decimal("1"), sale, batch)
 
-
-# --- EPrescription -----------------------------------------------------------------
 
 @pytest.fixture
 def doctor():

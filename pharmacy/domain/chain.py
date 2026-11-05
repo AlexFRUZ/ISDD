@@ -1,4 +1,3 @@
-"""Мережа аптек, аптека й фармацевт."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -11,7 +10,6 @@ if TYPE_CHECKING:
     from pharmacy.domain.batch import Batch
 
 
-# eq=False: об'єкти предметної області порівнюють за ідентичністю, а не за полями.
 @dataclass(eq=False)
 class Pharmacy:
     number: str
@@ -23,7 +21,6 @@ class Pharmacy:
     pharmacists: list[Pharmacist] = field(default_factory=list, repr=False)
 
     def pick_batch_for_sale(self, inn: str, quantity: int, today: date) -> Batch | None:
-        """Експерт добору партії: аптека знає свої партії. Правило FEFO."""
         suitable = [b for b in self.batches if b.drug.inn == inn and b.can_supply(quantity, today)]
         return min(suitable, key=lambda b: b.expiry_date, default=None)
 

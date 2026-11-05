@@ -342,7 +342,6 @@
 
 ```python
 def normalize_text(value: Any) -> str:
-    """Зводить багаторядковий текст YAML до одного рядка з одинарними пробілами."""
     return " ".join(str(value).split()) if value is not None else ""
 ```
 
@@ -350,7 +349,6 @@ def normalize_text(value: Any) -> str:
 
 ```python
 def _render_tree(spec: Specification, req: Requirement, depth: int = 0) -> list[str]:
-    """Вимога і рекурсивно всі її підвимоги з відступом під батьківською."""
     lines = [f"{'  ' * depth}- **{req.id}**{_priority_label(req)}. {req.text}"]
     for child in spec.children(req.id):
         lines += _render_tree(spec, child, depth + 1)

@@ -1,4 +1,3 @@
-"""Покупець."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -34,6 +33,5 @@ class Customer:
     @keeps_invariant
     def create_reservation(self, code: str, now: datetime, quantity: int, batch: Batch,
                            prescription: EPrescription | None = None) -> Reservation:
-        """Творець резервування: покупець містить свої резервування."""
         require(self.can_reserve, f"Покупець уже має {MAX_ACTIVE_RESERVATIONS} активні резервування")
         return Reservation(code, now, quantity, self, batch, prescription)

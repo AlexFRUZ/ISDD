@@ -1,10 +1,3 @@
-"""Доповнює доменну діаграму операціями з діаграм послідовності (ЛР 4, завдання 1).
-
-Операції класу є підписами стрілок, що входять до його об'єкта. У доменній моделі
-ЛР 2 операцій немає, а тут вони з'являються як результат поведінкового моделювання.
-
-Запуск: python class_ops.py uc7_sale.csv uc2_reserve.csv --domain ../lab2/domain.puml -o diagrams/domain_ops.puml
-"""
 from __future__ import annotations
 
 import argparse
@@ -29,7 +22,6 @@ def collect_operations(paths: list[str]) -> dict[str, list[str]]:
 
 
 def add_operations(puml: str, operations: dict[str, list[str]]) -> tuple[str, int]:
-    """Додає операції в тіло класу після атрибутів, відділяючи їх лінією."""
     added = 0
     for name, labels in operations.items():
         pattern = re.compile(rf'(class "{re.escape(name)}" as \w+ \{{\n(?:.*\n)*?)(\}})')

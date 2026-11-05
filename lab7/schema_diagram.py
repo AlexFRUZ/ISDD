@@ -1,8 +1,3 @@
-"""Діаграма реляційної схеми PlantUML, побудована за самою базою даних (ЛР 7).
-
-Запуск: python schema_diagram.py -o diagrams/schema.puml
-Дані про таблиці беруться з PRAGMA, тому діаграма не може розійтися зі schema.sql.
-"""
 from __future__ import annotations
 
 import argparse

@@ -1,9 +1,3 @@
-"""Плани виконання двох найчастіших запитів до і після створення індексів (ЛР 7).
-
-Запуск: python query_plans.py
-Запити взято з репозиторіїв: вони виконуються в кожному UC7 і UC2. Час вимірюється на
-синтетичних даних, бо на кількох рядках демонстраційної бази різниці не видно.
-"""
 from __future__ import annotations
 
 import sqlite3
@@ -15,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from pharmacy.persistence.sqlite import SQL_DIR, SqliteBatchRepository  # noqa: E402
+from pharmacy.persistence.sqlite import SQL_DIR, SqliteBatchRepository
 
 PHARMACIES = 200
 DRUGS = 500

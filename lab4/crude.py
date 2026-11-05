@@ -1,7 +1,3 @@
-"""Матриця CRUDE за таблицями сценаріїв (ЛР 4, завдання 2).
-
-Запуск: python crude.py uc7_sale.csv uc2_reserve.csv -k crude_keywords.yaml -o CRUDE.md
-"""
 from __future__ import annotations
 
 import argparse
@@ -15,7 +11,6 @@ import yaml
 from seq_gen import Row, load_table
 
 LETTER_ORDER = "CRUDE"
-# Назви в таблицях сценаріїв пишуться разом, а в доменній моделі через пробіл.
 DOMAIN_ALIASES = {"ЕлектроннийРецепт": "Електронний рецепт", "ПозиціяПродажу": "Позиція продажу"}
 
 
@@ -35,7 +30,6 @@ def letter_for(row: Row, keywords: dict[str, list[str]]) -> str:
 
 
 def build_matrix(tables: list[list[Row]], keywords: dict[str, list[str]]) -> dict[str, dict[str, set[str]]]:
-    """Клієнт -> сервер -> літери. Актори й повернення результатів не є викликами класів."""
     matrix: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
     for rows in tables:
         messages = [r for r in rows if r.kind in ("call", "create")]
@@ -58,7 +52,6 @@ def render_markdown(matrix: dict[str, dict[str, set[str]]]) -> str:
 
 
 def coupling(matrix: dict[str, dict[str, set[str]]]) -> dict[str, tuple[int, int]]:
-    """Клас -> (до скількох класів звертається, скільки класів звертається до нього)."""
     classes = list(dict.fromkeys([*matrix, *(s for row in matrix.values() for s in row)]))
     return {c: (len(matrix.get(c, {})), sum(c in row for row in matrix.values())) for c in classes}
 
@@ -72,7 +65,6 @@ def created_but_never_read(matrix: dict[str, dict[str, set[str]]]) -> list[str]:
 
 
 def load_domain_links(path: str | Path) -> tuple[set[str], set[frozenset[str]]]:
-    """Класи й зв'язки доменної моделі з classification.csv."""
     with open(path, encoding="utf-8", newline="") as stream:
         rows = list(csv.DictReader(stream))
     classes = {r["name"] for r in rows if r["code"] in ("C", "AC")}
@@ -82,7 +74,6 @@ def load_domain_links(path: str | Path) -> tuple[set[str], set[frozenset[str]]]:
 
 
 def links_missing_in_domain(matrix, classes: set[str], links: set[frozenset[str]]) -> list[str]:
-    """Звернення між доменними класами мають спиратися на зв'язок доменної моделі."""
     missing = []
     for client, row in matrix.items():
         for server in row:

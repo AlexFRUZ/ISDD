@@ -1,4 +1,3 @@
-"""Спільні фікстури. Кожен тест контролера виконується для обох реалізацій сховища."""
 import sqlite3
 from dataclasses import dataclass
 from datetime import date, datetime

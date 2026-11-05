@@ -1,4 +1,3 @@
-"""Тести програм seq_gen.py, crude.py і fsm_check.py (ЛР 4)."""
 from pathlib import Path
 
 import pytest
@@ -21,8 +20,6 @@ def fragment(no, kind, text=""):
 def t(state, event, next_state, guard="", action=""):
     return Transition(state, event, guard, action, next_state)
 
-
-# --- seq_gen.py -------------------------------------------------------------------
 
 @pytest.mark.parametrize("table", ["uc7_sale.csv", "uc2_reserve.csv"])
 def test_real_tables_pass_kung_rule(table):
@@ -79,8 +76,6 @@ def test_broken_table_returns_error_code(capsys):
     assert "Знайдено порушень: 1" in capsys.readouterr().out
 
 
-# --- crude.py ---------------------------------------------------------------------
-
 KEYWORDS = {"R": ["отримує"], "U": ["змінює"], "D": ["видаляє"]}
 
 
@@ -113,8 +108,6 @@ def test_links_missing_in_domain():
         matrix, {"Продаж", "Партія", "Лікар"}, {frozenset(("Продаж", "Партія"))})
     assert missing == ["Продаж -> Лікар"]
 
-
-# --- fsm_check.py -----------------------------------------------------------------
 
 GOOD = [t("[*]", "почати", "A"), t("A", "далі", "B"), t("B", "кінець", "[*]")]
 

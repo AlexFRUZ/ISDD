@@ -1,4 +1,3 @@
-"""Лікар та електронний рецепт."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -45,7 +44,6 @@ class EPrescription:
                   "Частка реімбурсації має бути в межах від 0 до 1")
 
     def invalid_reason(self, today: date) -> str | None:
-        """Причина недійсності або None для чинного рецепта. Експерт: рецепт знає свій стан."""
         if self.state is not PrescriptionState.ACTIVE:
             return f"стан «{self.state.value}»"
         if self.issued_on > today:
@@ -64,7 +62,6 @@ class EPrescription:
         return self.is_valid(today) and self.inn == inn
 
     def pricing_policy(self) -> PricingPolicy:
-        """Спосіб ціноутворення визначає рецепт, бо він знає частку реімбурсації."""
         return ReimbursedPricing(self.reimbursement_share) if self.reimbursement_share else StandardPricing()
 
     @keeps_invariant

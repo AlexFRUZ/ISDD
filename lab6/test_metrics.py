@@ -1,4 +1,3 @@
-"""Тести metrics.py і відповідності діаграми класів проєкту коду (ЛР 6)."""
 import importlib
 import re
 import sys
@@ -62,7 +61,7 @@ class A:
         for item in items:
             pass
 """)
-    assert classes["A"].decisions == 5  # if, and, comprehension, if у comprehension, for
+    assert classes["A"].decisions == 5
 
 
 def test_class_does_not_count_itself(tmp_path):
@@ -84,7 +83,6 @@ def test_no_warning_at_threshold():
 
 
 def dcd_classes():
-    """Методи кожного класу з dcd.puml: рядки виду +назва(...)."""
     text = (HERE / "diagrams" / "dcd.puml").read_text(encoding="utf-8")
     for match in re.finditer(r"class (\w+)[^\n]*\{\n(.*?)\n\}", text, re.S):
         yield match.group(1), re.findall(r"\+(\w+)\(", match.group(2))

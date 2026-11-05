@@ -1,15 +1,3 @@
-"""Доменна модель ІС «Мережа аптек» (ЛР 2, завдання 3).
-
-Кожен клас моделі є класом Python, атрибути є полями, наслідування є успадкуванням,
-асоціації є посиланнями або колекціями, а асоціативний клас «Позиція продажу» має
-посилання на обидва кінці зв'язку. Кратності й інваріанти перевіряють методи класів.
-Поточну дату передають явно, щоб правила можна було тестувати детерміновано.
-
-ЛР 4: клас Reservation отримав табличну машину станів. Таблицю завантажено з того
-самого файлу transitions.csv, який перевіряє fsm_check.py, тому модель і код не
-розходяться. Обмеження «продовжити один раз» виражено самою таблицею: зі стану
-«Продовжене» подію «продовжити» не визначено.
-"""
 from __future__ import annotations
 
 import csv
@@ -30,11 +18,11 @@ TRANSITIONS_FILE = Path(__file__).resolve().parent.parent / "lab4" / "transition
 
 
 class DomainError(Exception):
-    """Порушення кратності або інваріанта предметної області."""
+    pass
 
 
 class TransitionError(DomainError):
-    """Подія недопустима в поточному стані або не виконано умову переходу."""
+    pass
 
 
 class ReservationState(Enum):
@@ -65,7 +53,6 @@ class PaymentMethod(Enum):
     CARD = "картка"
 
 
-# eq=False: об'єкти предметної області порівнюють за ідентичністю, а не за полями.
 @dataclass(eq=False)
 class Pharmacy:
     number: str
@@ -161,7 +148,6 @@ class Batch:
         return self.expiry_date - today >= timedelta(days=MIN_SHELF_LIFE_DAYS)
 
     def block(self, quantity: int) -> None:
-        """Блокує кількість під резервування, не змінюючи фізичний залишок."""
         if quantity > self.available:
             raise DomainError(f"Партія {self.series}: доступно лише {self.available} уп.")
         self.reserved += quantity
@@ -172,7 +158,6 @@ class Batch:
         self.reserved -= quantity
 
     def write_off_sold(self, quantity: int, today: date) -> None:
-        """Зменшує фізичний залишок під час продажу."""
         if self.is_expired(today):
             raise DomainError(f"Партія {self.series}: строк придатності минув")
         if quantity > self.available:
@@ -284,7 +269,6 @@ class Reservation:
         return self.state in ACTIVE_RESERVATION_STATES
 
     def fire(self, event: str, moment: datetime | None = None) -> None:
-        """Обробляє подію за таблицею переходів; недопустима подія кидає виняток."""
         moment = moment or self.created_at
         transitions = TRANSITIONS.get((self.state.value, event))
         if not transitions:
@@ -360,7 +344,6 @@ class Transition:
 
 
 def load_transitions(path: Path = TRANSITIONS_FILE) -> dict[tuple[str, str], list[Transition]]:
-    """Завантажує таблицю переходів. Невідома умова чи дія є помилкою моделі."""
     table: dict[tuple[str, str], list[Transition]] = defaultdict(list)
     with open(path, encoding="utf-8", newline="") as stream:
         for row in csv.DictReader(stream, delimiter=";"):
@@ -403,8 +386,6 @@ class Sale:
 
 @dataclass(eq=False)
 class SaleLine:
-    """Асоціативний клас зв'язку «Продаж – Партія»."""
-
     quantity: int
     unit_price: Decimal
     sale: Sale

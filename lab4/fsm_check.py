@@ -1,12 +1,3 @@
-"""Перевірка машини станів за таблицею переходів (ЛР 4, завдання 3).
-
-Формат таблиці: state;event;guard;action;next. Рядок зі станом [*] задає початковий
-стан, рядок із next=[*] робить стан кінцевим. Порожній next означає, що подію
-оголошено, але цей стан її не приймає (клітинка NA).
-
-Запуск: python fsm_check.py transitions.csv --name reservation_states
-Код завершення: 0 - аномалій немає, 1 - аномалії знайдено.
-"""
 from __future__ import annotations
 
 import argparse
@@ -57,12 +48,10 @@ class StateMachine:
         return list(dict.fromkeys(t.state for t in self.real if t.next == PSEUDO_STATE))
 
     def dead_states(self) -> list[str]:
-        """Стан без вихідних переходів, який не є кінцевим (порожній рядок таблиці)."""
         with_exit = {t.state for t in self.real}
         return [s for s in self.states if s not in with_exit]
 
     def unreachable_states(self) -> list[str]:
-        """Обхід графа в ширину від початкового стану."""
         graph: dict[str, set[str]] = defaultdict(set)
         for transition in self.real:
             graph[transition.state].add(transition.next)
@@ -76,12 +65,10 @@ class StateMachine:
         return [s for s in self.states if s not in visited]
 
     def neglected_events(self) -> list[str]:
-        """Подія, яку не приймає жоден стан (порожній стовпець таблиці)."""
         accepted = {t.event for t in self.real}
         return [e for e in self.events if e not in accepted]
 
     def nondeterminism(self) -> list[str]:
-        """Кілька переходів за однією подією з однаковою умовою, зокрема без умови."""
         groups: dict[tuple[str, str, str], list[str]] = defaultdict(list)
         for transition in self.real:
             groups[(transition.state, transition.event, transition.guard)].append(transition.next)
@@ -104,7 +91,6 @@ class StateMachine:
         return "\n".join(lines + ["@enduml", ""])
 
     def to_markdown(self) -> str:
-        """Таблиця «стани x події»: клітинка містить наступний стан, умову й дію."""
         cells: dict[tuple[str, str], list[str]] = defaultdict(list)
         for transition in self.real:
             text = "кінець" if transition.next == PSEUDO_STATE else transition.next

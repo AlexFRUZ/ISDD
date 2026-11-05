@@ -1,7 +1,3 @@
-"""Класи еквівалентності й граничні значення бізнес-правил (ЛР 7, завдання 3).
-
-Таблиці тестових випадків наведено в lab7/equivalence_classes.md.
-"""
 from datetime import timedelta
 from decimal import Decimal
 
@@ -18,8 +14,6 @@ def reserve(ctx, quantity=1, drug="Парацетамол"):
     return ctx.reservations.reserve(PHONE, "А-01", drug, quantity)
 
 
-# --- Правило 1: кількість упаковок у резервуванні (R2.2) ---------------------------
-
 @pytest.mark.req("R2.2")
 @pytest.mark.parametrize("quantity", [1, 2, 5, 6])
 def test_quantity_in_allowed_class(ctx, quantity):
@@ -33,8 +27,6 @@ def test_quantity_outside_allowed_class(ctx, quantity):
         reserve(ctx, quantity)
     assert refusal.value.flow == "4a"
 
-
-# --- Правило 2: кількість активних резервувань покупця (R2.1) ----------------------
 
 @pytest.mark.req("R2.1")
 @pytest.mark.parametrize("already_active", [0, 1, 2])
@@ -52,8 +44,6 @@ def test_active_count_blocks_new_reservation(ctx, already_active):
     with pytest.raises(Refused, match="3 активні"):
         reserve(ctx)
 
-
-# --- Правило 3: строк дії рецепта (R6.2) -------------------------------------------
 
 @pytest.fixture
 def doctor():
@@ -73,8 +63,6 @@ def test_prescription_issued_in_future_is_invalid(doctor):
     assert recipe.invalid_reason(TODAY) == "дата виписки ще не настала"
 
 
-# --- Правило 4: залишковий строк придатності для резервування (R2.5) ----------------
-
 @pytest.mark.req("R2.5")
 @pytest.mark.parametrize("days_left, can_reserve", [(0, False), (29, False), (30, True), (31, True)])
 def test_shelf_life_for_reservation(days_left, can_reserve):
@@ -84,8 +72,6 @@ def test_shelf_life_for_reservation(days_left, can_reserve):
     assert batch.can_be_reserved(1, TODAY) is can_reserve
 
 
-# --- Правило 5: строк придатності під час продажу (R8) -----------------------------
-
 @pytest.mark.req("R8")
 @pytest.mark.parametrize("days_left, expired", [(-1, True), (0, True), (1, False)])
 def test_batch_expiry_for_sale(days_left, expired):
@@ -94,8 +80,6 @@ def test_batch_expiry_for_sale(days_left, expired):
     batch = d.Batch("S-1", TODAY + timedelta(days=days_left), Decimal("1"), Decimal("2"), 5, drug, pharmacy)
     assert batch.is_expired(TODAY) is expired
 
-
-# --- Правило 6: кількість у продажу за рецептом (R6.3) -----------------------------
 
 @pytest.mark.req("R6.3")
 @pytest.mark.parametrize("quantity", [1, 2])
@@ -114,8 +98,6 @@ def test_sale_quantity_not_positive_is_contract_violation(ctx, quantity):
     with pytest.raises(d.ContractError):
         ctx.sales.sell("Ф-7", "E-100", quantity)
 
-
-# --- Правило 7: строк дії резервування (R4) ----------------------------------------
 
 @pytest.mark.req("R4", "R4.1")
 @pytest.mark.parametrize("hours, expired", [(23, False), (24, False), (25, True)])

@@ -1,10 +1,3 @@
-"""Консольний інтерфейс. Лише розбирає аргументи й друкує результат.
-
-Приклади:
-  python -m pharmacy.ui.cli seed
-  python -m pharmacy.ui.cli reserve --phone +380671112233 --pharmacy А-01 --drug Парацетамол --qty 2
-  python -m pharmacy.ui.cli sell --pharmacist Ф-7 --recipe E-100 --qty 1
-"""
 from __future__ import annotations
 
 import argparse

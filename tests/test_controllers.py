@@ -1,4 +1,3 @@
-"""Тести контролерів без інтерфейсу користувача для обох реалізацій сховища (ЛР 5, ЛР 7)."""
 from datetime import timedelta
 from decimal import Decimal
 
@@ -14,8 +13,6 @@ PHONE = "+380671112233"
 def reserve(ctx, drug="Парацетамол", quantity=1, recipe=None, phone=PHONE, pharmacy="А-01"):
     return ctx.reservations.reserve(phone, pharmacy, drug, quantity, recipe)
 
-
-# --- UC7 Продати за е-рецептом ----------------------------------------------------
 
 @pytest.mark.req("R6", "R6.1", "R6.4")
 def test_sale_normal_flow(ctx):
@@ -77,8 +74,6 @@ def test_sale_unknown_pharmacist(ctx):
         ctx.sales.sell("Ф-0", "E-100", 1)
 
 
-# --- UC2 Зарезервувати препарат ---------------------------------------------------
-
 @pytest.mark.req("R2", "R2.3")
 def test_reserve_normal_flow(ctx):
     result = reserve(ctx, quantity=2)
@@ -89,7 +84,7 @@ def test_reserve_normal_flow(ctx):
 
 @pytest.mark.req("R2.5")
 def test_reserve_skips_batch_with_short_shelf_life(ctx):
-    assert reserve(ctx).series == "PA-1"  # PA-0 ближча за строком, але має лише 10 днів
+    assert reserve(ctx).series == "PA-1"
 
 
 @pytest.mark.req("R2.1")

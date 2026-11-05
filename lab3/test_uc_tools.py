@@ -1,4 +1,3 @@
-"""Тести програм ucd.py і trace.py (ЛР 3)."""
 import copy
 import importlib.util
 from pathlib import Path
@@ -9,10 +8,9 @@ import ucd
 
 HERE = Path(__file__).parent
 
-# Назва trace.py збігається з модулем стандартної бібліотеки, тому завантажуємо за шляхом.
 _spec = importlib.util.spec_from_file_location("trace_tool", HERE / "trace.py")
 trace = importlib.util.module_from_spec(_spec)
-import sys  # noqa: E402
+import sys
 
 sys.modules["trace_tool"] = trace
 _spec.loader.exec_module(trace)
@@ -69,7 +67,7 @@ def test_check_isolated_actor(model):
 def test_diagram_has_all_elements(model):
     text = ucd.build_diagram(model, "Резервування")
     assert 'rectangle "Резервування"' in text and "<<extend>>" in text and "<<include>>" in text
-    assert 'usecase "UC9 Перевірити е-рецепт" as UC9' in text  # зовнішній use case поза межею
+    assert 'usecase "UC9 Перевірити е-рецепт" as UC9' in text
     assert "<|--" in text
 
 

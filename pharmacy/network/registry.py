@@ -1,8 +1,3 @@
-"""Шлюз до реєстру е-рецептів.
-
-Реальний реєстр ЕСОЗ у навчальному проєкті замінено локальною реалізацією з тим самим
-інтерфейсом. Заміна на справжній клієнт API змінить лише цей пакет.
-"""
 from __future__ import annotations
 
 from datetime import date
@@ -12,7 +7,7 @@ from pharmacy.domain import EPrescription
 
 
 class RegistryUnavailable(Exception):
-    """Реєстр не відповідає."""
+    pass
 
 
 class PrescriptionRegistry(Protocol):
@@ -21,8 +16,6 @@ class PrescriptionRegistry(Protocol):
 
 
 class PrescriptionSource(Protocol):
-    """Сховище рецептів, яке імітує дані реєстру. Рівень network про рівень збереження не знає."""
-
     def get(self, key: str) -> EPrescription | None: ...
     def save(self, entity: EPrescription) -> None: ...
 

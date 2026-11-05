@@ -1,4 +1,3 @@
-"""Продаж і його позиції."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -45,7 +44,6 @@ class Sale:
 
     @keeps_invariant
     def add_line(self, batch: Batch, quantity: int) -> SaleLine:
-        """Творець позиції: чек агрегує свої позиції."""
         require(not any(line.batch is batch for line in self.lines),
                 f"Партія {batch.series} вже є в чеку {self.number}")
         require(self.prescription is not None or not batch.drug.requires_prescription,
@@ -64,8 +62,6 @@ class Sale:
 
 @dataclass(eq=False)
 class SaleLine:
-    """Асоціативний клас зв'язку «Продаж – Партія»."""
-
     quantity: int
     unit_price: Decimal
     sale: Sale

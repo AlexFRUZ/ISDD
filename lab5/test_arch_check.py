@@ -1,4 +1,3 @@
-"""Тести arch_check.py і тест архітектури реального проєкту (ЛР 5, завдання 3)."""
 from pathlib import Path
 
 import pytest
@@ -30,7 +29,6 @@ def messages(root, rules=TOY_RULES):
 
 
 def test_project_respects_architecture():
-    """Порушення шарів, цикл або заборонений модуль ламає цей тест."""
     violations, cycles, *_ = ac.check(PROJECT_PACKAGE.resolve(), RULES)
     assert [str(v) for v in violations] == [] and cycles == []
 

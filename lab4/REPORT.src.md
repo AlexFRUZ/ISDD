@@ -15,17 +15,17 @@ title: Моделювання динамічної поведінки інфор
 
 ## 2. Завдання 1. Таблиці сценаріїв і діаграми послідовності
 
-<!-- md: scenarios.md -->
+@include md: scenarios.md
 
 ### 2.1 Таблиці сценаріїв
 
 Таблиця `uc7_sale.csv`:
 
-<!-- txt: uc7_sale.csv text -->
+@include txt: uc7_sale.csv text
 
 Таблиця `uc2_reserve.csv`:
 
-<!-- txt: uc2_reserve.csv text -->
+@include txt: uc2_reserve.csv text
 
 ### 2.2 Програма seq_gen.py
 
@@ -33,12 +33,12 @@ title: Моделювання динамічної поведінки інфор
 формує текст PlantUML. Учасники йдуть у порядку першої появи: суб'єкт першого рядка стає
 актором, клас із суфіксом UI стає `boundary`, клас із назвою на «Контролер» стає `control`.
 
-<!-- py: seq_gen.py check_kung_rule -->
+@include py: seq_gen.py check_kung_rule
 
 У копії `uc7_broken.csv` рядки 3 і 4 поміняно місцями. Результат роботи програми на обох таблицях
 і на зіпсованій копії:
 
-<!-- txt: results/seq_gen.txt -->
+@include txt: results/seq_gen.txt
 
 ![Діаграма послідовності UC7](diagrams/uc7_sale.png)
 
@@ -50,7 +50,7 @@ title: Моделювання динамічної поведінки інфор
 до доменної діаграми ЛР 2. Так діаграма класів отримує операції, яких у доменній моделі
 навмисно не було.
 
-<!-- txt: results/class_ops.txt -->
+@include txt: results/class_ops.txt
 
 ![Доменні класи з операціями](diagrams/domain_ops.png)
 
@@ -59,11 +59,11 @@ title: Моделювання динамічної поведінки інфор
 Програма `crude.py` визначає літеру за типом рядка та словником `crude_keywords.yaml`. Актори
 й повернення результатів до матриці не входять, бо не є викликами класів.
 
-<!-- py: crude.py letter_for -->
+@include py: crude.py letter_for
 
-<!-- md: CRUDE.md -->
+@include md: CRUDE.md
 
-<!-- txt: results/crude.txt -->
+@include txt: results/crude.txt
 
 **Аналіз.**
 
@@ -86,9 +86,9 @@ title: Моделювання динамічної поведінки інфор
 рядок `[*];створити`, а кінцевими є стани `Видане`, `Скасоване` і `Прострочене`, з яких іде
 перехід у `[*]`.
 
-<!-- txt: transitions.csv text -->
+@include txt: transitions.csv text
 
-<!-- md: reservation_states.md -->
+@include md: reservation_states.md
 
 ![Машина станів класу «Резервування»](diagrams/reservation_states.png)
 
@@ -97,16 +97,16 @@ title: Моделювання динамічної поведінки інфор
 Програма будує діаграму й таблицю та виявляє чотири види аномалій. Недосяжні стани знаходить
 обхід графа в ширину від початкового стану:
 
-<!-- py: fsm_check.py StateMachine.unreachable_states -->
+@include py: fsm_check.py StateMachine.unreachable_states
 
 Результат на робочій таблиці:
 
-<!-- txt: results/fsm_ok.txt -->
+@include txt: results/fsm_ok.txt
 
 Копія `transitions_broken.csv` містить усі чотири аномалії. Порожній `next` означає, що подію
 оголошено, але цей стан її не приймає.
 
-<!-- txt: results/fsm_broken.txt -->
+@include txt: results/fsm_broken.txt
 
 ### 4.3 Реалізація в коді
 
@@ -115,7 +115,7 @@ title: Моделювання динамічної поведінки інфор
 Головна перевага в тому, що `domain.py` завантажує той самий файл `transitions.csv`, який перевіряє
 `fsm_check.py`, тому модель і код не можуть розійтися.
 
-<!-- py: ../lab2/domain.py Reservation.fire -->
+@include py: ../lab2/domain.py Reservation.fire
 
 Умови й дії таблиці зіставлено з функціями коду через словники `GUARDS` і `ACTIONS`. Якщо в таблиці
 з'явиться невідома умова чи дія, модуль під час завантаження кине помилку.
@@ -131,12 +131,12 @@ title: Моделювання динамічної поведінки інфор
 
 Параметризований тест перевіряє кожен рядок таблиці переходів:
 
-<!-- py: test_reservation_fsm.py test_every_transition -->
+@include py: test_reservation_fsm.py test_every_transition
 
 Окремий параметризований тест перевіряє сім недопустимих пар «стан – подія», а інші тести
 перевіряють дії переходів і умови-охоронці.
 
-<!-- txt: results/pytest.txt -->
+@include txt: results/pytest.txt
 
 ## 5. Відповіді на контрольні питання
 

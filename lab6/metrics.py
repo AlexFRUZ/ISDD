@@ -1,17 +1,3 @@
-"""Метрики якості проєкту класів (ЛР 6, завдання 3).
-
-Запуск: python metrics.py ../pharmacy --max-methods 10 --max-fanout 5 --max-dit 3
-
-Для кожного класу обчислюються: кількість методів і атрибутів, глибина дерева
-успадкування (DIT) у межах проєкту, fan-out (скільки інших класів проєкту використовує
-клас) і fan-in (скільки класів проєкту використовують цей клас). Посиланням вважається
-будь-яке ім'я класу в тілі класу: анотація типу, створення об'єкта чи виклик. Імпорт,
-який клас не використовує, не рахується, бо модуль може містити кілька класів.
-
-Додатково рахується кількість точок рішення (розгалуження, цикли, логічні оператори).
-Fan-out показує, про які типи знає клас, а точки рішення показують, скільки логіки він
-виконує сам. Тому перенесення правил із контролера в доменний клас помітно саме тут.
-"""
 from __future__ import annotations
 
 import argparse
@@ -45,7 +31,6 @@ def _base_name(node: ast.expr) -> str:
 
 
 def _count_attributes(node: ast.ClassDef) -> int:
-    """Анотовані поля класу та присвоєння self.x у конструкторі."""
     names = {s.target.id for s in node.body
              if isinstance(s, ast.AnnAssign) and isinstance(s.target, ast.Name)}
     for method in node.body:
@@ -64,7 +49,6 @@ def analyse_class(node: ast.ClassDef, module: str) -> ClassInfo:
     used |= {n.value for n in ast.walk(node)
              if isinstance(n, ast.Constant) and isinstance(n.value, str) and n.value.isidentifier()}
     decisions = sum(isinstance(n, DECISION_NODES) for n in ast.walk(node))
-    # Фільтр у comprehension є полем ifs, а не вузлом ast.If, тому його рахуємо окремо.
     decisions += sum(len(n.ifs) for n in ast.walk(node) if isinstance(n, ast.comprehension))
     return ClassInfo(node.name, module, len(methods), _count_attributes(node),
                      [_base_name(b) for b in node.bases], used, decisions)

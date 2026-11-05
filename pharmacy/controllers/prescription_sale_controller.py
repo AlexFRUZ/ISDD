@@ -1,8 +1,3 @@
-"""Контролер UC7 «Продати за е-рецептом».
-
-Контролер лише координує кроки варіанта використання: правила застосовують доменні
-класи (ЛР 6, шаблон Expert), а створення позицій виконує сам продаж (шаблон Creator).
-"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -34,11 +29,10 @@ class PrescriptionSaleController:
 
     def sell(self, pharmacist_number: str, recipe_number: str, quantity: int,
              payment: str = "картка") -> SaleResult:
-        """Контракт: lab6/contracts.md, контракт 1."""
         require(quantity >= 1, "Кількість має бути додатною")
         now = self.clock()
         today = now.date()
-        with self.uow.transaction():  # продаж, партія й рецепт змінюються разом
+        with self.uow.transaction():
             pharmacist = self._pharmacist(pharmacist_number)
             recipe = self._valid_recipe(recipe_number, today)
             if not recipe.allows_quantity(quantity):

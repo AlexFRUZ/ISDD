@@ -1,8 +1,3 @@
-"""Модель машиночитаної специфікації вимог (ЛР 1, завдання 2).
-
-Модуль лише завантажує дані й не перевіряє їх: некоректна специфікація також
-має завантажитися, щоб про її дефекти міг повідомити validate.py.
-"""
 from __future__ import annotations
 
 import re
@@ -14,12 +9,10 @@ import yaml
 
 
 def normalize_text(value: Any) -> str:
-    """Зводить багаторядковий текст YAML до одного рядка з одинарними пробілами."""
     return " ".join(str(value).split()) if value is not None else ""
 
 
 def id_sort_key(req_id: str) -> tuple:
-    """Природний порядок ID: R2 стоїть перед R10, а R1.2 перед R1.10."""
     parts = re.findall(r"[A-Za-zА-Яа-я]+|\d+", req_id)
     return tuple((0, int(p)) if p.isdigit() else (1, p) for p in parts)
 
@@ -30,7 +23,7 @@ class Requirement:
     type: str
     text: str
     source: str = ""
-    priority: Any = None  # без приведення до int: перевірку робить валідатор
+    priority: Any = None
     parent: str | None = None
 
 
@@ -98,6 +91,5 @@ def spec_from_dict(data: dict) -> Specification:
 
 
 def load_spec(path: str | Path) -> Specification:
-    """Завантажує специфікацію з YAML-файлу."""
     with open(path, encoding="utf-8") as stream:
         return spec_from_dict(yaml.safe_load(stream) or {})

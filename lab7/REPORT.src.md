@@ -16,7 +16,7 @@ title: Проєктування шару управління даними та 
 
 ### 2.1 Відображення класів на таблиці
 
-<!-- md: mapping.md -->
+@include md: mapping.md
 
 ### 2.2 Схема
 
@@ -28,11 +28,11 @@ title: Проєктування шару управління даними та 
 
 Фрагмент схеми з обмеженнями:
 
-<!-- sql: ../pharmacy/persistence/schema.sql batch -->
+@include sql: ../pharmacy/persistence/schema.sql batch
 
 ### 2.3 Нормалізація
 
-<!-- md: normalization.md -->
+@include md: normalization.md
 
 ### 2.4 Тестові дані й відкидання некоректних даних
 
@@ -40,14 +40,14 @@ title: Проєктування шару управління даними та 
 рецепти чинні в день створення бази. Програма `check_constraints.py` перевіряє, що схема відкидає
 некоректні дані:
 
-<!-- txt: results/constraints.txt -->
+@include txt: results/constraints.txt
 
 ### 2.5 Плани запитів та індекси
 
 Проаналізовано два запити, які виконуються в кожному UC7 і UC2. Текст запитів взято безпосередньо
 з репозиторіїв. Час виміряно на синтетичних даних, бо на кількох рядках різниці не видно.
 
-<!-- txt: results/query_plans.txt -->
+@include txt: results/query_plans.txt
 
 Обидва плани змінилися зі сканування таблиці (`SCAN`) на пошук за індексом (`SEARCH`). Абсолютні значення
 часу залежать від комп'ютера, тому важливим є саме порядок різниці. Ціна індексів полягає в сповільненні
@@ -59,9 +59,9 @@ title: Проєктування шару управління даними та 
 
 Інтерфейси визначено через `typing.Protocol` у файлі `persistence/repositories.py`:
 
-<!-- py: ../pharmacy/persistence/repositories.py Repository -->
+@include py: ../pharmacy/persistence/repositories.py Repository
 
-<!-- py: ../pharmacy/persistence/repositories.py UnitOfWork -->
+@include py: ../pharmacy/persistence/repositories.py UnitOfWork
 
 Репозиторій є для кожного кореневого об'єкта, який використовують контролери: аптека, фармацевт,
 препарат, партія, покупець, резервування, рецепт, продаж. Лікар зберігається разом із рецептом, а позиції
@@ -90,9 +90,9 @@ SQLite доповнює карта ідентичності: один рядок
 Варіант використання UC7 змінює таблиці `prescription`, `batch`, `sale`, `sale_line` і `sequence`. Усі зміни
 виконуються в одній транзакції:
 
-<!-- py: ../pharmacy/persistence/sqlite.py SqliteUnitOfWork.transaction -->
+@include py: ../pharmacy/persistence/sqlite.py SqliteUnitOfWork.transaction
 
-<!-- py: ../pharmacy/controllers/prescription_sale_controller.py PrescriptionSaleController.sell -->
+@include py: ../pharmacy/controllers/prescription_sale_controller.py PrescriptionSaleController.sell
 
 Тест `test_use_case_failure_after_redeem_rolls_everything_back` імітує збій на останньому кроці й перевіряє, що
 рецепт, залишок і лічильник номерів повернулися до попереднього стану. Реєстр у проєкті локальний, тому його
@@ -103,29 +103,29 @@ SQLite доповнює карта ідентичності: один рядок
 
 Програма `arch_check.py` з ЛР 5 підтвердила, що доменні класи не імпортують `sqlite3` і модулі шару даних:
 
-<!-- txt: results/arch_check.txt -->
+@include txt: results/arch_check.txt
 
 ## 4. Завдання 3. Тестування і покриття
 
 ### 4.1 Класи еквівалентності
 
-<!-- md: equivalence_classes.md -->
+@include md: equivalence_classes.md
 
-<!-- py: ../tests/test_boundaries.py test_quantity_outside_allowed_class -->
+@include py: ../tests/test_boundaries.py test_quantity_outside_allowed_class
 
 ### 4.2 Тести на основі варіанта використання
 
-<!-- md: uc7_tests.md -->
+@include md: uc7_tests.md
 
 Фікстура створює схему з `schema.sql` у базі `sqlite3.connect(":memory:")`:
 
-<!-- py: ../tests/conftest.py make_sqlite_uow -->
+@include py: ../tests/conftest.py make_sqlite_uow
 
 ### 4.3 Тести репозиторіїв
 
 Параметризована фікстура виконує ті самі тести для обох реалізацій:
 
-<!-- py: ../tests/conftest.py uow -->
+@include py: ../tests/conftest.py uow
 
 Доменні об'єкти порівнюються за ідентичністю, тому тест «збереження – читання» порівнює значення всіх
 скалярних полів. Перевірку обмежень бази виконано лише для SQLite: у пам'яті їх немає, там некоректні дані
@@ -137,7 +137,7 @@ SQLite доповнює карта ідентичності: один рядок
 
 Команда `pytest --cov=pharmacy --cov-branch --cov-report=term-missing`:
 
-<!-- txt: results/coverage_final.txt -->
+@include txt: results/coverage_final.txt
 
 Пакети `domain` і `controllers` мають 100 % покриття, що перевищує вимогу 80 %. Спочатку покриття становило
 99 %, а тести для рядків `chain.py`, `supply.py` і методу `archive` довели його до 100 %.
@@ -152,21 +152,21 @@ SQLite доповнює карта ідентичності: один рядок
 
 ### 4.5 Регресійне тестування
 
-<!-- md: regression.md -->
+@include md: regression.md
 
 Тести, що не пройшли після першої зміни:
 
-<!-- txt: results/regression_failures.txt -->
+@include txt: results/regression_failures.txt
 
 Запуск усіх тестів проєкту після виправлення:
 
-<!-- txt: results/all_tests.txt -->
+@include txt: results/all_tests.txt
 
 ### 4.6 Робота застосунку з базою SQLite
 
-<!-- txt: results/cli_demo.txt -->
+@include txt: results/cli_demo.txt
 
-<!-- txt: results/db_after_demo.txt -->
+@include txt: results/db_after_demo.txt
 
 ## 5. Відповіді на контрольні питання
 

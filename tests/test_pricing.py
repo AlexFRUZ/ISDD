@@ -1,4 +1,3 @@
-"""Тести шаблону Strategy: заміна поведінки без зміни клієнтського коду (ЛР 6)."""
 from datetime import date, datetime
 from decimal import Decimal
 
@@ -17,7 +16,6 @@ def batch():
 
 
 def checkout(batch, policy):
-    """Клієнтський код однаковий для всіх стратегій."""
     pharmacist = d.Pharmacist("Ф-7", "Бойко Ірина", batch.pharmacy)
     sale = d.Sale("Ч-1", NOW, d.PaymentMethod.CARD, pharmacist, pricing=policy)
     sale.add_line(batch, 2)

@@ -1,4 +1,3 @@
-"""Тести репозиторіїв. Фікстура uow виконує кожен тест для обох реалізацій (ЛР 7)."""
 import dataclasses
 import sqlite3
 from datetime import date, datetime, timedelta
@@ -15,7 +14,6 @@ SCALARS = (str, int, Decimal, date, Enum, type(None))
 
 
 def scalars(entity):
-    """Значення всіх скалярних полів: доменні об'єкти порівнюються за ідентичністю."""
     values = {f.name: getattr(entity, f.name) for f in dataclasses.fields(entity)}
     return {name: value for name, value in values.items() if isinstance(value, SCALARS)}
 
@@ -60,8 +58,6 @@ def new_sale(uow, number="Ч-1"):
     uow.sales.save(sale)
     return sale
 
-
-# --- Збереження і читання дають рівний об'єкт --------------------------------------
 
 def test_round_trip_pharmacy(world):
     original = scalars(first_pharmacy(world))
@@ -135,8 +131,6 @@ def test_saving_again_updates_instead_of_duplicating(world):
     assert reread(world, world.reservations, "R-1").state is d.ReservationState.CANCELLED
 
 
-# --- Читання неіснуючого об'єкта ---------------------------------------------------
-
 @pytest.mark.parametrize("repository, key", [
     ("pharmacies", "А-99"), ("pharmacists", "Ф-99"), ("drugs", "Невідомий"), ("customers", "+380"),
     ("reservations", "R-99"), ("prescriptions", "E-999"), ("sales", "Ч-99"),
@@ -145,8 +139,6 @@ def test_saving_again_updates_instead_of_duplicating(world):
 def test_missing_object_is_none(world, repository, key):
     assert getattr(world, repository).get(key) is None
 
-
-# --- Пошук за критерієм ------------------------------------------------------------
 
 def test_find_pharmacies_by_city(world):
     assert [p.number for p in world.pharmacies.find_by_city("Хмельницький")] == ["А-01", "А-02"]
@@ -182,8 +174,6 @@ def test_find_sales_by_period(world):
     assert [s.number for s in world.sales.find_by_period(NOW - timedelta(hours=1), NOW + timedelta(hours=1))] == ["Ч-1"]
     assert world.sales.find_by_period(NOW + timedelta(hours=1), NOW + timedelta(hours=2)) == []
 
-
-# --- Видалення ---------------------------------------------------------------------
 
 @pytest.mark.parametrize("repository, key", [
     ("prescriptions", "E-301"), ("batches", ("А-02", "Актрапід", "IN-1")),
@@ -241,8 +231,6 @@ def test_delete_missing_object_is_harmless(world):
     world.drugs.delete("Невідомий")
 
 
-# --- Транзакції --------------------------------------------------------------------
-
 def test_transaction_commits_together(world):
     with world.transaction():
         new_reservation(world)
@@ -278,7 +266,6 @@ def test_next_number_grows_and_rolls_back(world):
 
 @pytest.mark.req("R6", "R6.4")
 def test_use_case_failure_after_redeem_rolls_everything_back(ctx, monkeypatch):
-    """UC7 змінює рецепт, партію й продаж: збій на останньому кроці скасовує все."""
     def broken_save(_sale):
         raise RuntimeError("збій запису продажу")
 
@@ -306,9 +293,6 @@ def test_reservation_failure_rolls_everything_back(ctx, monkeypatch):
     ctx.uow.clear()
     assert ctx.uow.customers.get("+380671112233") is None
 
-
-# --- Лише SQLite: обмеження бази даних і перетворення типів --------------------------
-# У пам'яті обмежень бази немає: там некоректні дані відкидають інваріанти доменних класів.
 
 @pytest.fixture
 def db():
@@ -357,7 +341,6 @@ def test_sqlite_money_has_no_rounding_errors(db):
 
 
 def test_sqlite_old_reservation_loads_despite_short_shelf_life(db):
-    """Умови створення не перевіряються повторно під час читання давніх записів."""
     new_reservation(db)
     db.connection.execute("UPDATE drug_series SET expiry_date = ? WHERE series = 'PA-1'",
                           ((TODAY + timedelta(days=1)).isoformat(),))
@@ -365,7 +348,6 @@ def test_sqlite_old_reservation_loads_despite_short_shelf_life(db):
 
 
 def test_sqlite_series_keeps_single_expiry_date_for_two_pharmacies(db):
-    """Наслідок 3НФ: строк придатності серії зберігається в одному місці."""
     drug = db.drugs.get("Парацетамол")
     second = db.pharmacies.get("А-02")
     db.batches.save(d.Batch("PA-1", date(2027, 11, 4), Decimal("20"), Decimal("36"), 3, drug, second))

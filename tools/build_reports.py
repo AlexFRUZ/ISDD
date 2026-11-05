@@ -1,17 +1,3 @@
-"""Збирає звіти labN/REPORT.md із вихідних файлів labN/REPORT.src.md.
-
-Запуск: python tools/build_reports.py
-
-Код і результати підставляються з реальних файлів, тому звіт не розходиться з проєктом.
-Директиви (рядок цілком):
-  <!-- md: шлях -->                вставити Markdown
-  <!-- txt: шлях [мова] -->        вставити файл блоком коду
-  <!-- py: шлях Клас.метод -->     вставити клас або функцію Python
-  <!-- sql: шлях таблиця -->       вставити CREATE TABLE
-  <!-- table: use_cases -->        таблиця меж варіантів використання
-Запис md@lab5, py@lab5 тощо бере файл зі стану за тегом Git, щоб звіт показував код
-свого етапу, а не фінальну версію.
-"""
 from __future__ import annotations
 
 import ast
@@ -22,8 +8,10 @@ from pathlib import Path
 
 import yaml
 
+from source_cleanup import clean_python
+
 ROOT = Path(__file__).resolve().parent.parent
-DIRECTIVE = re.compile(r"^<!-- (\w+)(?:@(\w+))?: (.+?) -->$")
+DIRECTIVE = re.compile(r"^@include (\w+)(?:@(\w+))?: (.+)$")
 HEADING = re.compile(r"^(#+) ")
 COURSE = "Проєктування та розробка інформаційних систем"
 TEAM = "Гладун Олександр, Дідур Володимир, Дидо Ростислав"
@@ -40,7 +28,6 @@ def read_source(lab_dir: Path, path: str, tag: str | None) -> str:
 
 
 def extract_python(source: str, dotted: str) -> str:
-    """Вихідний текст класу чи функції разом із декораторами, зокрема Клас.метод."""
     node: ast.AST = ast.parse(source)
     for name in dotted.split("."):
         node = next(n for n in node.body
@@ -57,7 +44,6 @@ def extract_table(source: str, table: str) -> str:
 
 
 def shift_headings(text: str, base: int, keep_title: bool) -> str:
-    """Понижує заголовки вставленого файлу, щоб вони лягли під поточний розділ."""
     result = []
     for line in text.splitlines():
         match = HEADING.match(line)
@@ -91,7 +77,7 @@ def expand(kind: str, tag: str | None, argument: str, lab_dir: Path, base: int, 
     if kind == "txt":
         return fenced(source, extra or "text")
     if kind == "py":
-        return fenced(extract_python(source, extra), "python")
+        return fenced(extract_python(clean_python(source), extra), "python")
     if kind == "sql":
         return fenced(extract_table(source, extra), "sql")
     raise ValueError(f"Невідома директива: {kind}")

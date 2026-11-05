@@ -23,7 +23,7 @@ title: Моделювання предметної області засобам
 розмітку розширено: запис `[аптек|аптека]{1}` означає, що в тексті стоїть слово «аптек», а
 дублікати рахуються за нормальною формою «аптека».
 
-<!-- txt: domain.txt text -->
+@include txt: domain.txt text
 
 ### 2.2 Програма brainstorm.py
 
@@ -32,11 +32,11 @@ title: Моделювання предметної області засобам
 поза діапазоном 1–9 і відсутній номер правила програма повідомляє з номером рядка, а файл
 у цьому разі не зберігає.
 
-<!-- py: brainstorm.py find_markup_errors -->
+@include py: brainstorm.py find_markup_errors
 
 Початок файлу `brainstorm.csv`:
 
-<!-- txt: results/brainstorm_head.txt -->
+@include txt: results/brainstorm_head.txt
 
 ### 2.3 Класифікація
 
@@ -83,7 +83,7 @@ title: Моделювання предметної області засобам
 Програма `dmcd.py` перетворює класифікацію на текст PlantUML за правилами Kung. Операції не
 генеруються, а псевдоніми класів беруться зі словника `name_map.yaml`.
 
-<!-- py: dmcd.py _render_relation -->
+@include py: dmcd.py _render_relation
 
 ![Доменна модель ІС «Мережа аптек»](domain.png)
 
@@ -94,18 +94,18 @@ title: Моделювання предметної області засобам
 Програма `review.py` реалізує шість перевірок контрольного списку. Кожна перевірка є
 окремою функцією, а код завершення дорівнює 1, якщо є зауваження.
 
-<!-- py: review.py check_class_as_attribute -->
+@include py: review.py check_class_as_attribute
 
 Запуск на першій версії класифікації, де є лише інформація з тексту (`results/classification_v1.csv`):
 
-<!-- txt: results/review_v1.txt -->
+@include txt: results/review_v1.txt
 
 Програма виявила 11 зв'язків без кратностей і 4 посилання на класи, які в тексті згадані
 лише у фразах наслідування. Модель виправлено: додано кратності й підкласи препарату.
 
 Запуск на виправленій класифікації:
 
-<!-- txt: results/review_final.txt -->
+@include txt: results/review_final.txt
 
 ### 3.3 Ручне рецензування
 
@@ -127,18 +127,18 @@ title: Моделювання предметної області засобам
 
 Кратність 0..3 і діапазон кількості перевіряються під час створення резервування:
 
-<!-- py@lab2: domain.py Reservation.__post_init__ -->
+@include py@lab2: domain.py Reservation.__post_init__
 
 Інваріант «зарезервовано не більше наявного» підтримують методи партії:
 
-<!-- py@lab2: domain.py Batch.block -->
+@include py@lab2: domain.py Batch.block
 
 ### 4.2 Тести
 
 `test_domain.py` містить 29 випадків, із них 22 перевіряють порушення кратностей та
 інваріантів. `test_tools.py` перевіряє програми завдань 1 і 2. Запуск усіх тестів:
 
-<!-- txt: results/pytest.txt -->
+@include txt: results/pytest.txt
 
 ### 4.3 Тест відповідності моделі та коду
 
@@ -147,13 +147,13 @@ title: Моделювання предметної області засобам
 наслідування є успадкування. Понад вимоги завдання тест перевіряє і зв'язки: кожна асоціація
 чи агрегація має поле-посилання хоча б на одному кінці.
 
-<!-- py: test_conformance.py test_relation_has_reference_in_code -->
+@include py: test_conformance.py test_relation_has_reference_in_code
 
 **Результат.** Перший запуск розбіжностей не виявив, бо код написано безпосередньо за
 словником імен `name_map.yaml`. Щоб упевнитися, що тест справді знаходить розбіжності, у код
 по черзі внесено три навмисні зміни, а після кожної код відновлено:
 
-<!-- txt: results/conformance_mutations.txt -->
+@include txt: results/conformance_mutations.txt
 
 Кожну зміну тест виявив окремим повідомленням.
 
@@ -221,4 +221,4 @@ title: Моделювання предметної області засобам
 
 ## Додаток А. Файл domain.puml
 
-<!-- txt: domain.puml text -->
+@include txt: domain.puml text

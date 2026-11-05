@@ -1,8 +1,3 @@
-"""Генератор діаграми класів PlantUML за класифікацією (ЛР 2, завдання 2).
-
-Запуск: python dmcd.py classification.csv domain.puml
-Операції в доменній моделі не показують, тому програма їх не генерує.
-"""
 from __future__ import annotations
 
 import sys
@@ -21,12 +16,10 @@ def load_aliases(path: Path = NAME_MAP_FILE) -> dict[str, str]:
 
 
 def _alias(name: str, aliases: dict[str, str]) -> str:
-    """Латинський псевдонім; якщо словник його не знає, збирає ім'я без пробілів."""
     return aliases.get(name, name.replace(" ", "_"))
 
 
 def _ends(mult: str) -> tuple[str, str]:
-    """Кратності кінців зв'язку «m;n»; порожній запис дає порожні кінці."""
     first, _, second = mult.partition(";")
     return (f' "{first}"' if first else "", f' "{second}"' if second else "")
 
@@ -47,7 +40,6 @@ def _render_relation(row: Row, aliases: dict[str, str]) -> list[str]:
         return [f"{owner}{left} o--{right} {target} : {row.name} >"]
     if row.code == "AS":
         return [f"{owner}{left} --{right} {target} : {row.name} >"]
-    # Асоціативний клас приєднується пунктиром до асоціації між двома класами.
     return [f"{owner}{left} --{right} {target}", f"({owner}, {target}) .. {_alias(row.name, aliases)}"]
 
 

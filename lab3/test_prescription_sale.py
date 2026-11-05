@@ -1,4 +1,3 @@
-"""Тести прототипу UC7: нормальний потік і кожен альтернативний потік опису."""
 from datetime import date, datetime
 from decimal import Decimal
 

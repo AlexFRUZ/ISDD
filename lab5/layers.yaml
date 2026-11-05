@@ -1,4 +1,3 @@
-# Архітектурні правила ІС «Мережа аптек». Рівні перелічено згори донизу.
 package: pharmacy
 layers:
   - ui
@@ -14,7 +13,6 @@ allowed:
   persistence: [domain]
   domain: [foundation]
   foundation: []
-# Сторонні модулі, які рівню заборонено імпортувати.
 forbidden_modules:
   domain: [sqlite3, argparse, pickle, json, flask, fastapi]
   foundation: [sqlite3, argparse, pickle, flask, fastapi]

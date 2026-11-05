@@ -15,14 +15,14 @@ title: Функціональне моделювання та проєктува
 
 ## 2. Завдання 1. Варіанти використання
 
-<!-- md: use_case_derivation.md -->
+@include md: use_case_derivation.md
 
 ### 2.1 Модель use_cases.yaml
 
 Файл містить 13 варіантів використання, 7 акторів (серед них 2 зовнішні системи) і
 3 підсистеми. Для кожного варіанта використання задано TUCBW і TUCEW:
 
-<!-- table: use_cases -->
+@include table: use_cases
 
 ### 2.2 Генерація діаграм і перевірка моделі
 
@@ -30,9 +30,9 @@ title: Функціональне моделювання та проєктува
 інших підсистем, на які є посилання, показуються поза межею. Програма також виконує п'ять
 перевірок якості моделі.
 
-<!-- py: ucd.py check_model -->
+@include py: ucd.py check_model
 
-<!-- txt: results/ucd.txt -->
+@include txt: results/ucd.txt
 
 ![Підсистема «Резервування»](diagrams/uc_reservation.png)
 
@@ -51,29 +51,29 @@ title: Функціональне моделювання та проєктува
 Програма `trace.py` будує матрицю, обчислює пріоритет кожного варіанта використання й
 розподіляє варіанти використання за ітераціями.
 
-<!-- py: trace.py Matrix.uc_priority -->
+@include py: trace.py Matrix.uc_priority
 
-<!-- py: trace.py plan_iterations -->
+@include py: trace.py plan_iterations
 
 Матриця з `RUTM.md` (останній стовпець показує кількість тестів, позначених вимогою):
 
-<!-- md: RUTM.md -->
+@include md: RUTM.md
 
 Запуск без параметра `--functional-only` показує рядки без use case:
 
-<!-- txt: results/trace_all.txt -->
+@include txt: results/trace_all.txt
 
 Порожні рядки N3, N4, N6 і C1–C3 очікувані: це вимоги до всієї системи, тому їх не можна
 віднести до окремого варіанта використання. Параметр `--functional-only` виключає такі
 рядки:
 
-<!-- txt: results/trace_final.txt -->
+@include txt: results/trace_final.txt
 
 ### 3.1 Порівняння автоматичного й експертного плану
 
 Під час першого запуску план містив помилку:
 
-<!-- txt: results/trace_v1.txt -->
+@include txt: results/trace_v1.txt
 
 UC2 потрапив в ітерацію 1, а UC9, який він включає, в ітерацію 2. Причина в тому, що
 планувальник враховував лише `depends_on`. Включений варіант використання є обов'язковою
@@ -97,7 +97,7 @@ UC2 потрапив в ітерацію 1, а UC9, який він включа
 
 Обрано UC7 «Продати за е-рецептом»: він має найвищий пріоритет і п'ять альтернативних потоків.
 
-<!-- md: uc7_description.md -->
+@include md: uc7_description.md
 
 ### 4.1 Діаграма діяльності
 
@@ -107,7 +107,7 @@ Fork/join показує, що зменшення залишку й створе
 
 ### 4.2 Протокол walkthrough
 
-<!-- md: walkthrough.md -->
+@include md: walkthrough.md
 
 ### 4.3 Прототип
 
@@ -115,26 +115,26 @@ Fork/join показує, що зменшення залишку й створе
 нормальний потік, а кожен альтернативний потік є окремою гілкою, що кидає `SaleRefused` з
 номером потоку.
 
-<!-- py: prescription_sale.py PrescriptionSaleService.sell -->
+@include py: prescription_sale.py PrescriptionSaleService.sell
 
-<!-- py: prescription_sale.py PrescriptionSaleService._pick_batch -->
+@include py: prescription_sale.py PrescriptionSaleService._pick_batch
 
 Робота консольного інтерфейсу для нормального й усіх альтернативних потоків:
 
-<!-- txt: results/cli_demo.txt -->
+@include txt: results/cli_demo.txt
 
 ### 4.4 Тести
 
 Для нормального потоку й кожного альтернативного потоку написано окремий тест. Тести
 позначено власним маркером pytest:
 
-<!-- py: test_prescription_sale.py test_flow_6a_registry_down_changes_nothing -->
+@include py: test_prescription_sale.py test_flow_6a_registry_down_changes_nothing
 
 Програма `trace.py` читає ці маркери через модуль `ast`. Спочатку використовувався регулярний
 вираз, який не бачив тестів із багаторядковим `parametrize`. Цю помилку виявив тест
 `test_find_tests_reads_markers`.
 
-<!-- txt: results/pytest.txt -->
+@include txt: results/pytest.txt
 
 ## 5. Відповіді на контрольні питання
 
@@ -201,4 +201,4 @@ TUCEW (This Use Case Ends With) описує момент, коли актор �
 
 ## Додаток А. Файл use_cases.yaml
 
-<!-- txt: use_cases.yaml yaml -->
+@include txt: use_cases.yaml yaml

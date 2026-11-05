@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Рендерить усі діаграми PlantUML у PNG. Шлях до plantuml.jar задає змінна PLANTUML_JAR.
 set -eu
 cd "$(dirname "$0")/.."
 : "${PLANTUML_JAR:?Вкажіть шлях до plantuml.jar у змінній PLANTUML_JAR}"

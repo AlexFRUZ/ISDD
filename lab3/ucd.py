@@ -1,8 +1,3 @@
-"""Генератор діаграм варіантів використання та перевірка моделі (ЛР 3, завдання 1).
-
-Запуск: python ucd.py use_cases.yaml -o diagrams
-Код завершення: 0 - модель без зауважень, 1 - зауваження є, 2 - помилка запуску.
-"""
 from __future__ import annotations
 
 import argparse
@@ -24,7 +19,6 @@ def load_model(path: str | Path) -> dict:
 
 
 def check_model(model: dict) -> list[str]:
-    """Перевірки якості з пункту 5 завдання 1."""
     use_cases = model["use_cases"]
     ids = {uc["id"] for uc in use_cases}
     remarks: list[str] = []
@@ -54,7 +48,6 @@ def check_model(model: dict) -> list[str]:
 
 
 def _actors_for(model: dict, own_use_cases: list[dict]) -> list[dict]:
-    """Актори підсистеми разом із батьками, щоб показати узагальнення."""
     direct = {name for uc in own_use_cases for name in uc["actors"]}
     by_name = {a["name"]: a for a in model["actors"]}
     names = set(direct)
@@ -62,7 +55,6 @@ def _actors_for(model: dict, own_use_cases: list[dict]) -> list[dict]:
         while by_name[name].get("parent"):
             name = by_name[name]["parent"]
             names.add(name)
-    # Дочірні актори успадковують асоціації батька, якщо він пов'язаний із цією підсистемою.
     names |= {a["name"] for a in model["actors"] if a.get("parent") in direct}
     return [a for a in model["actors"] if a["name"] in names]
 
@@ -84,7 +76,6 @@ def build_diagram(model: dict, subsystem: str) -> str:
     lines += [f'  usecase "{uc["id"]} {uc["name"]}" as {uc["id"]}' for uc in own]
     lines += ["}", ""]
 
-    # Варіанти використання інших підсистем показуємо поза межею, якщо на них є посилання.
     foreign = sorted({ref for uc in own for kind in ("include", "extend") for ref in uc[kind]} - own_ids)
     lines += [f'usecase "{ref} {use_cases[ref]["name"]}" as {ref}' for ref in foreign]
 

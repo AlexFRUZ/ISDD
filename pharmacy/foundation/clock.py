@@ -1,4 +1,3 @@
-"""Джерело поточного часу. Контролери отримують його явно, щоб тести були детермінованими."""
 from __future__ import annotations
 
 from collections.abc import Callable

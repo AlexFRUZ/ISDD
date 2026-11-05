@@ -1,10 +1,3 @@
-"""Реалізація репозиторіїв на SQLite (ЛР 7, завдання 2).
-
-Репозиторії перетворюють рядки таблиць на доменні об'єкти й навпаки. Усі запити
-параметризовані. Карта ідентичності гарантує, що один рядок дає один об'єкт: доменні
-об'єкти посилаються один на одного, тому без неї виникали б копії й нескінченна рекурсія.
-Залежність спрямована від цього модуля до домену, а домен про SQLite нічого не знає.
-"""
 from __future__ import annotations
 
 import sqlite3
@@ -428,7 +421,7 @@ class SqliteUnitOfWork:
     def __init__(self, connection: sqlite3.Connection) -> None:
         self.connection = connection
         connection.row_factory = sqlite3.Row
-        connection.isolation_level = None  # транзакціями керує метод transaction
+        connection.isolation_level = None
         connection.execute("PRAGMA foreign_keys = ON")
         self.identity: dict = {}
         self.pharmacies = SqlitePharmacyRepository(self)
@@ -442,14 +435,13 @@ class SqliteUnitOfWork:
 
     @contextmanager
     def transaction(self) -> Iterator[None]:
-        """Усі зміни всередині блоку фіксуються разом або відкочуються разом."""
         self.clear()
         self.connection.execute("BEGIN")
         try:
             yield
         except BaseException:
             self.connection.execute("ROLLBACK")
-            self.clear()  # об'єкти в пам'яті могли змінитися, а база вже ні
+            self.clear()
             raise
         self.connection.execute("COMMIT")
 
@@ -471,7 +463,6 @@ def create_schema(connection: sqlite3.Connection) -> None:
 
 
 def create_database(path: str | Path) -> None:
-    """Створює файл бази з демонстраційними даними. Наявний файл замінюється."""
     Path(path).unlink(missing_ok=True)
     connection = sqlite3.connect(path)
     connection.execute("PRAGMA foreign_keys = ON")

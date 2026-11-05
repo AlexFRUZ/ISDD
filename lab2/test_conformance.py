@@ -1,9 +1,3 @@
-"""Тест відповідності доменної моделі та коду (ЛР 2, завдання 3).
-
-Читає classification.csv і через інтроспекцію перевіряє, що кожен клас, атрибут
-і зв'язок наслідування моделі існує в коді. Тому модель і код не можуть розійтися
-непомітно: зміна будь-якого з них без другого ламає цей тест.
-"""
 import dataclasses
 from pathlib import Path
 
@@ -62,7 +56,6 @@ def test_association_class_links_both_ends(row):
     [(r.owner, r.target) for r in ROWS if r.code in ("AS", "AG")],
 )
 def test_relation_has_reference_in_code(owner, target):
-    """Зв'язок реалізовано полем хоча б на одному кінці: посиланням або колекцією."""
     def refers(source, destination):
         return any(CLASS_MAP[destination] in str(f.type) for f in dataclasses.fields(python_class(source)))
     assert refers(owner, target) or refers(target, owner), f"немає зв'язку {owner} – {target}"

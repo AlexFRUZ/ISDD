@@ -1,12 +1,3 @@
-"""Збір результатів брейнштормінгу з розміченого тексту (ЛР 2, завдання 1).
-
-Формат розмітки: [фраза]{номер правила 1-9}. Українська мова флективна, тому
-розмітку розширено: [аптек|аптека]{1} означає, що в тексті стоїть «аптек», а
-дублікати рахуються за нормальною формою «аптека».
-
-Запуск: python brainstorm.py domain.txt brainstorm.csv
-Код завершення: 0 - успіх, 1 - некоректна розмітка, 2 - помилка запуску.
-"""
 from __future__ import annotations
 
 import csv
@@ -26,13 +17,11 @@ class Phrase:
 
 
 def normalize_phrase(raw: str) -> str:
-    """Бере нормальну форму, якщо вона є, і прибирає різницю в регістрі та пробілах."""
     canonical = raw.split("|")[-1]
     return " ".join(canonical.lower().split())
 
 
 def find_markup_errors(text: str) -> list[str]:
-    """Повертає повідомлення про незакриті дужки та неправильні номери правил."""
     errors: list[str] = []
     for line_no, line in enumerate(text.splitlines(), start=1):
         for match in MARKUP.finditer(line):
@@ -41,7 +30,7 @@ def find_markup_errors(text: str) -> list[str]:
             rule = int(match.group(2))
             if not MIN_RULE <= rule <= MAX_RULE:
                 errors.append(f"Рядок {line_no}: номер правила {rule} поза діапазоном 1-9 у «{match.group(1)}»")
-        rest = MARKUP.sub("", line)  # після вилучення коректних елементів дужок не лишається
+        rest = MARKUP.sub("", line)
         if "[" in rest:
             errors.append(f"Рядок {line_no}: незакрита дужка «[» або вкладена розмітка")
         if "]" in rest:
@@ -50,7 +39,6 @@ def find_markup_errors(text: str) -> list[str]:
 
 
 def collect_phrases(text: str) -> list[Phrase]:
-    """Видаляє дублікати, зберігаючи порядок першої появи фрази."""
     phrases: dict[tuple[str, int], Phrase] = {}
     for match in MARKUP.finditer(text):
         key = (normalize_phrase(match.group(1)), int(match.group(2)))

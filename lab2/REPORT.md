@@ -55,7 +55,6 @@
 
 ```python
 def find_markup_errors(text: str) -> list[str]:
-    """Повертає повідомлення про незакриті дужки та неправильні номери правил."""
     errors: list[str] = []
     for line_no, line in enumerate(text.splitlines(), start=1):
         for match in MARKUP.finditer(line):
@@ -64,7 +63,7 @@ def find_markup_errors(text: str) -> list[str]:
             rule = int(match.group(2))
             if not MIN_RULE <= rule <= MAX_RULE:
                 errors.append(f"Рядок {line_no}: номер правила {rule} поза діапазоном 1-9 у «{match.group(1)}»")
-        rest = MARKUP.sub("", line)  # після вилучення коректних елементів дужок не лишається
+        rest = MARKUP.sub("", line)
         if "[" in rest:
             errors.append(f"Рядок {line_no}: незакрита дужка «[» або вкладена розмітка")
         if "]" in rest:
@@ -144,7 +143,6 @@ def _render_relation(row: Row, aliases: dict[str, str]) -> list[str]:
         return [f"{owner}{left} o--{right} {target} : {row.name} >"]
     if row.code == "AS":
         return [f"{owner}{left} --{right} {target} : {row.name} >"]
-    # Асоціативний клас приєднується пунктиром до асоціації між двома класами.
     return [f"{owner}{left} --{right} {target}", f"({owner}, {target}) .. {_alias(row.name, aliases)}"]
 ```
 
@@ -241,7 +239,6 @@ def __post_init__(self) -> None:
 
 ```python
 def block(self, quantity: int) -> None:
-    """Блокує кількість під резервування, не змінюючи фізичний залишок."""
     if quantity > self.available:
         raise DomainError(f"Партія {self.series}: доступно лише {self.available} уп.")
     self.reserved += quantity
@@ -269,7 +266,6 @@ def block(self, quantity: int) -> None:
     [(r.owner, r.target) for r in ROWS if r.code in ("AS", "AG")],
 )
 def test_relation_has_reference_in_code(owner, target):
-    """Зв'язок реалізовано полем хоча б на одному кінці: посиланням або колекцією."""
     def refers(source, destination):
         return any(CLASS_MAP[destination] in str(f.type) for f in dataclasses.fields(python_class(source)))
     assert refers(owner, target) or refers(target, owner), f"немає зв'язку {owner} – {target}"

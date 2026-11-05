@@ -1,4 +1,3 @@
-"""Наскрізні тести консольного інтерфейсу на файлі бази SQLite (ЛР 7)."""
 import pytest
 
 from pharmacy.ui import cli

@@ -1,8 +1,3 @@
-"""Генератор діаграм послідовності за таблицею сценарію (ЛР 4, завдання 1).
-
-Запуск: python seq_gen.py uc7_sale.csv -o uc7_sale.puml
-Код завершення: 0 - успіх, 1 - порушення правила Kung або структури фрагментів.
-"""
 from __future__ import annotations
 
 import argparse
@@ -40,7 +35,6 @@ def load_table(path: str | Path) -> list[Row]:
 
 
 def check_kung_rule(rows: list[Row]) -> list[str]:
-    """Суб'єкт рядка має бути об'єктом дії попереднього рядка або суб'єктом одного з попередніх."""
     violations: list[str] = []
     messages = [r for r in rows if r.is_message]
     seen_subjects: set[str] = set()
@@ -55,7 +49,6 @@ def check_kung_rule(rows: list[Row]) -> list[str]:
 
 
 def check_fragments(rows: list[Row]) -> list[str]:
-    """Кожен фрагмент має закриватися, а else може стояти лише всередині alt."""
     errors: list[str] = []
     stack: list[str] = []
     for row in rows:
@@ -73,7 +66,6 @@ def check_fragments(rows: list[Row]) -> list[str]:
 
 
 def participants(rows: list[Row]) -> list[str]:
-    """Учасники в порядку першої появи."""
     names: dict[str, None] = {}
     for row in rows:
         if row.is_message:
@@ -91,7 +83,6 @@ def _declaration(name: str, alias: str, actor: str, created: set[str]) -> str:
         keyword = "control"
     else:
         keyword = "participant"
-    # Об'єкт, створений у сценарії, оголошується в момент створення.
     return "" if name in created else f'{keyword} "{name}" as {alias}'
 
 

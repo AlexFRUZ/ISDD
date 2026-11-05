@@ -1,8 +1,3 @@
-"""Автоматизована перевірка архітектурних обмежень (ЛР 5, завдання 3).
-
-Запуск: python arch_check.py ../pharmacy --rules layers.yaml
-Код завершення: 0 - порушень немає, 1 - порушення є, 2 - помилка запуску.
-"""
 from __future__ import annotations
 
 import argparse
@@ -19,9 +14,9 @@ import yaml
 class Import:
     file: str
     line: int
-    source: str   # рівень модуля, що імпортує
-    target: str   # рівень імпортованого модуля; порожній для сторонніх модулів
-    module: str   # повна назва імпортованого модуля
+    source: str
+    target: str
+    module: str
 
 
 @dataclass(frozen=True)
@@ -40,13 +35,11 @@ def load_rules(path: str | Path) -> dict:
 
 
 def module_of(path: Path, root: Path) -> str:
-    """pharmacy/domain/batch.py дає pharmacy.domain.batch."""
     parts = path.relative_to(root.parent).with_suffix("").parts
     return ".".join(parts[:-1] if parts[-1] == "__init__" else parts)
 
 
 def _resolve(node: ast.ImportFrom, module: str, is_package: bool) -> str:
-    """Перетворює відносний імпорт на абсолютний."""
     if node.level == 0:
         return node.module or ""
     base = module.split(".")
@@ -110,7 +103,6 @@ def package_graph(imports: list[Import]) -> dict[str, set[str]]:
 
 
 def find_cycles(graph: dict[str, set[str]]) -> list[list[str]]:
-    """Пошук у глибину: ребро до вершини на поточному шляху замикає цикл."""
     cycles: list[list[str]] = []
     visited: set[str] = set()
 
@@ -145,7 +137,6 @@ def build_actual_diagram(graph: dict[str, set[str]], layers: list[str]) -> str:
 
 
 def compare_with_rules(graph: dict[str, set[str]], rules: dict) -> tuple[list[str], list[str]]:
-    """Залежності, яких немає в задумі, і задумані залежності, яких немає в коді."""
     extra, unused = [], []
     for source, allowed in rules["allowed"].items():
         actual = graph.get(source, set())

@@ -1,7 +1,3 @@
-"""Генератор документа SRS.md зі структурою IEEE 830 (ЛР 1, завдання 2).
-
-Запуск: python srs_report.py srs.yaml SRS.md
-"""
 from __future__ import annotations
 
 import sys
@@ -24,7 +20,6 @@ def _priority_label(req: Requirement) -> str:
 
 
 def _render_tree(spec: Specification, req: Requirement, depth: int = 0) -> list[str]:
-    """Вимога і рекурсивно всі її підвимоги з відступом під батьківською."""
     lines = [f"{'  ' * depth}- **{req.id}**{_priority_label(req)}. {req.text}"]
     for child in spec.children(req.id):
         lines += _render_tree(spec, child, depth + 1)

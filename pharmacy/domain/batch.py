@@ -1,4 +1,3 @@
-"""Партія препарату в аптеці."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -54,7 +53,6 @@ class Batch:
 
     @keeps_invariant
     def block(self, quantity: int) -> None:
-        """Блокує кількість під резервування, не змінюючи фізичний залишок."""
         require(quantity > 0, "Кількість має бути додатною")
         require(quantity <= self.available, f"Партія {self.series}: доступно лише {self.available} уп.")
         available_before = self.available
@@ -69,7 +67,6 @@ class Batch:
 
     @keeps_invariant
     def write_off_sold(self, quantity: int, today: date) -> None:
-        """Зменшує фізичний залишок під час продажу."""
         require(quantity > 0, "Кількість має бути додатною")
         require(not self.is_expired(today), f"Партія {self.series}: строк придатності минув")
         require(quantity <= self.available, f"Партія {self.series}: доступно лише {self.available} уп.")

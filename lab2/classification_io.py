@@ -1,4 +1,3 @@
-"""Спільне читання classification.csv для dmcd.py, review.py і test_conformance.py."""
 from __future__ import annotations
 
 import csv
@@ -21,7 +20,6 @@ class Row:
 
     @property
     def attribute_name(self) -> str:
-        """Назва атрибута без типу: «серія : String» дає «серія»."""
         return self.name.split(":")[0].strip()
 
     @property
@@ -35,5 +33,4 @@ def load_rows(path: str | Path) -> list[Row]:
 
 
 def class_names(rows: list[Row]) -> list[str]:
-    """Класи й асоціативні класи в порядку першої появи."""
     return list(dict.fromkeys(r.name for r in rows if r.code in ("C", "AC")))

@@ -97,7 +97,6 @@
 
 ```python
 def check_model(model: dict) -> list[str]:
-    """Перевірки якості з пункту 5 завдання 1."""
     use_cases = model["use_cases"]
     ids = {uc["id"] for uc in use_cases}
     remarks: list[str] = []
@@ -152,7 +151,6 @@ Use cases: 13, акторів: 7, зауважень: 0
 
 ```python
 def uc_priority(self, use_case: dict) -> int | None:
-    """Пріоритет use case дорівнює найвищому (найменшому) пріоритету його вимог."""
     known = {r["id"]: r.get("priority") for r in self.requirements}
     values = [known[r] for r in use_case.get("requirements", []) if known.get(r) is not None]
     return min(values) if values else None
@@ -160,13 +158,7 @@ def uc_priority(self, use_case: dict) -> int | None:
 
 ```python
 def plan_iterations(matrix: Matrix, capacity: int, iterations: int) -> tuple[list[list[dict]], dict[str, str]]:
-    """Жадібно розподіляє use cases за пріоритетом із урахуванням залежностей і потужності.
-
-    Залежність може стояти в тій самій ітерації, але не пізніше: тому внутрішній цикл
-    повторюється, доки в ітерацію вдається щось додати.
-    """
     def dependencies(use_case: dict) -> set[str]:
-        # Включений use case є обов'язковою частиною, тому він теж залежність.
         return set(use_case.get("depends_on", [])) | set(use_case.get("include", []))
 
     pending = sorted(
@@ -392,18 +384,18 @@ Fork/join показує, що зменшення залишку й створе
 def sell(self, recipe_number: str, quantity: int, now: datetime,
          payment: PaymentMethod = PaymentMethod.CARD) -> Sale:
     today = now.date()
-    recipe = self._check_recipe(recipe_number, today)              # кроки 3, 3a, 3b
-    self._check_quantity(recipe, quantity)                         # кроки 4, 4a
-    batch = self._pick_batch(recipe, quantity, today)              # кроки 5, 5a
-    self._redeem(recipe, quantity, today)                          # кроки 6, 6a
-    return self._create_sale(recipe, batch, quantity, now, payment)  # крок 7
+    recipe = self._check_recipe(recipe_number, today)
+    self._check_quantity(recipe, quantity)
+    batch = self._pick_batch(recipe, quantity, today)
+    self._redeem(recipe, quantity, today)
+    return self._create_sale(recipe, batch, quantity, now, payment)
 ```
 
 ```python
 def _pick_batch(self, recipe: EPrescription, quantity: int, today) -> Batch:
     here = self._suitable_batches(self.pharmacist.pharmacy, recipe.inn, quantity, today)
     if here:
-        return min(here, key=lambda b: b.expiry_date)  # правило FEFO
+        return min(here, key=lambda b: b.expiry_date)
     others = [p.number for p in self.chain.pharmacies if p is not self.pharmacist.pharmacy
               and self._suitable_batches(p, recipe.inn, quantity, today)]
     hint = f" Препарат є в аптеках: {', '.join(others)}." if others else ""
@@ -520,7 +512,6 @@ TUCEW (This Use Case Ends With) описує момент, коли актор �
 ## Додаток А. Файл use_cases.yaml
 
 ```yaml
-# Модель варіантів використання ІС «Мережа аптек» (структура за таблицею 3.2).
 subsystems:
   Резервування: reservation
   Продаж: sales

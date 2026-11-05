@@ -1,9 +1,3 @@
-"""Тест відповідності доменної моделі та пакета pharmacy.domain (ЛР 2, ЛР 5).
-
-Читає classification.csv і через інтроспекцію перевіряє, що кожен клас, атрибут
-і зв'язок наслідування моделі існує в коді. Тому модель і код не можуть розійтися
-непомітно: зміна будь-якого з них без другого ламає цей тест.
-"""
 import dataclasses
 import sys
 from pathlib import Path
@@ -15,7 +9,7 @@ import pharmacy.domain as domain
 
 LAB2 = Path(__file__).resolve().parent.parent / "lab2"
 sys.path.insert(0, str(LAB2))
-from classification_io import class_names, load_rows  # noqa: E402
+from classification_io import class_names, load_rows
 
 ROWS = load_rows(LAB2 / "classification.csv")
 with open(LAB2 / "name_map.yaml", encoding="utf-8") as stream:
@@ -65,7 +59,6 @@ def test_association_class_links_both_ends(row):
     [(r.owner, r.target) for r in ROWS if r.code in ("AS", "AG")],
 )
 def test_relation_has_reference_in_code(owner, target):
-    """Зв'язок реалізовано полем хоча б на одному кінці: посиланням або колекцією."""
     def refers(source, destination):
         return any(CLASS_MAP[destination] in str(f.type) for f in dataclasses.fields(python_class(source)))
     assert refers(owner, target) or refers(target, owner), f"немає зв'язку {owner} – {target}"

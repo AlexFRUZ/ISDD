@@ -1,12 +1,3 @@
-"""Матриця трасування вимог і план ітерацій (ЛР 3, завдання 2 і 3).
-
-Запуск: python trace.py ../lab1/srs.yaml use_cases.yaml --capacity 10
-Параметри:
-  --capacity N         потужність команди на ітерацію (люд.-дні)
-  --iterations N       кількість ітерацій
-  --functional-only    не повідомляти про НФВ і обмеження без use case
-  --tests DIR          додати стовпець «Тести» за маркерами @pytest.mark.req
-"""
 from __future__ import annotations
 
 import argparse
@@ -34,7 +25,6 @@ class Matrix:
         return [uc["id"] for uc in self.use_cases if req_id in uc.get("requirements", [])]
 
     def uc_priority(self, use_case: dict) -> int | None:
-        """Пріоритет use case дорівнює найвищому (найменшому) пріоритету його вимог."""
         known = {r["id"]: r.get("priority") for r in self.requirements}
         values = [known[r] for r in use_case.get("requirements", []) if known.get(r) is not None]
         return min(values) if values else None
@@ -71,7 +61,6 @@ class Matrix:
 
 
 def _marked_requirements(function: ast.FunctionDef) -> list[str]:
-    """ID вимог із декоратора @pytest.mark.req("R6.2", ...) функції."""
     ids: list[str] = []
     for decorator in function.decorator_list:
         if (isinstance(decorator, ast.Call) and isinstance(decorator.func, ast.Attribute)
@@ -81,11 +70,6 @@ def _marked_requirements(function: ast.FunctionDef) -> list[str]:
 
 
 def find_tests(directory: str | Path) -> dict[str, list[str]]:
-    """Шукає позначені тести у файлах test_*.py.
-
-    Використано ast, а не регулярний вираз, бо між маркером і def може стояти
-    багаторядковий декоратор parametrize.
-    """
     found: dict[str, list[str]] = {}
     for path in sorted(Path(directory).glob("test_*.py")):
         for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
@@ -96,13 +80,7 @@ def find_tests(directory: str | Path) -> dict[str, list[str]]:
 
 
 def plan_iterations(matrix: Matrix, capacity: int, iterations: int) -> tuple[list[list[dict]], dict[str, str]]:
-    """Жадібно розподіляє use cases за пріоритетом із урахуванням залежностей і потужності.
-
-    Залежність може стояти в тій самій ітерації, але не пізніше: тому внутрішній цикл
-    повторюється, доки в ітерацію вдається щось додати.
-    """
     def dependencies(use_case: dict) -> set[str]:
-        # Включений use case є обов'язковою частиною, тому він теж залежність.
         return set(use_case.get("depends_on", [])) | set(use_case.get("include", []))
 
     pending = sorted(

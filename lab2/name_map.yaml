@@ -1,5 +1,3 @@
-# Словник відповідності імен доменної моделі та коду Python.
-# Використовують dmcd.py (псевдоніми PlantUML) і test_conformance.py.
 classes:
   Мережа аптек: PharmacyChain
   Аптека: Pharmacy

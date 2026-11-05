@@ -1,4 +1,3 @@
-"""Рівень бізнес-об'єктів. Цей пакет не знає про інтерфейс і спосіб збереження."""
 from pharmacy.domain.batch import MIN_SHELF_LIFE_DAYS, Batch
 from pharmacy.domain.chain import Pharmacist, Pharmacy, PharmacyChain
 from pharmacy.domain.customer import Customer

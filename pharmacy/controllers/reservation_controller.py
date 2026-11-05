@@ -1,8 +1,3 @@
-"""Контролер UC2 «Зарезервувати препарат».
-
-Контролер лише координує кроки: партію добирає аптека, ліміт перевіряє покупець,
-а резервування створює покупець, який його містить (шаблони Expert і Creator).
-"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -36,13 +31,12 @@ class ReservationController:
 
     def reserve(self, phone: str, pharmacy_number: str, trade_name: str, quantity: int,
                 recipe_number: str | None = None) -> ReservationResult:
-        """Створення резервування описує контракт 2 у lab6/contracts.md."""
         now = self.clock()
         today = now.date()
         if not Reservation.is_allowed_quantity(quantity):
             raise Refused("4a", f"Можна резервувати від {MIN_RESERVATION_QUANTITY} "
                                 f"до {MAX_RESERVATION_QUANTITY} упаковок")
-        with self.uow.transaction():  # резервування, партія й покупець змінюються разом
+        with self.uow.transaction():
             customer = self.uow.customers.get(phone) or Customer(phone, "")
             if not customer.can_reserve:
                 raise Refused("3a", f"Покупець уже має {MAX_ACTIVE_RESERVATIONS} активні резервування")

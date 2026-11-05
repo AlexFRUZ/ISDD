@@ -1,4 +1,3 @@
-"""Тести доменної моделі: кратності, інваріанти та нормальна поведінка (ЛР 2)."""
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
@@ -57,8 +56,6 @@ def reserve(customer, batch, code="R-1", quantity=1, prescription=None):
     return reservation
 
 
-# --- Нормальна поведінка ---------------------------------------------------------
-
 def test_reservation_blocks_stock_and_sets_expiry(customer, batch):
     reservation = reserve(customer, batch, quantity=2)
     assert batch.available == 18 and batch.quantity == 20
@@ -101,8 +98,6 @@ def test_rx_drug_can_be_reserved_with_matching_prescription(customer, rx_batch, 
     recipe = d.EPrescription("E-1", TODAY, "Amoxicillin", 2, doctor)
     assert reserve(customer, rx_batch, prescription=recipe).prescription is recipe
 
-
-# --- Порушення кратностей та інваріантів ------------------------------------------
 
 def test_customer_cannot_have_four_active_reservations(customer, batch):
     for number in range(3):

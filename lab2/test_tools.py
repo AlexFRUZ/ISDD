@@ -1,4 +1,3 @@
-"""Тести програм brainstorm.py, dmcd.py і review.py (ЛР 2)."""
 from pathlib import Path
 
 import brainstorm as b

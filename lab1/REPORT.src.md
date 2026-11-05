@@ -19,23 +19,23 @@ title: Збір та аналіз вимог до інформаційної с�
 
 ### 2.1 Опис предметної області
 
-<!-- md: domain_description.md -->
+@include md: domain_description.md
 
 ### 2.2 План інтерв'ю
 
-<!-- md: interview_plan.md -->
+@include md: interview_plan.md
 
 ### 2.3 Звіт про інтерв'ю
 
-<!-- md: interview_report.md -->
+@include md: interview_report.md
 
 ### 2.4 Користувацькі історії
 
-<!-- md: user_stories.md -->
+@include md: user_stories.md
 
 ### 2.5 Системний запит
 
-<!-- md: system_request.md -->
+@include md: system_request.md
 
 ## 3. Завдання 2. Специфікація вимог і генерація SRS
 
@@ -46,7 +46,7 @@ title: Збір та аналіз вимог до інформаційної с�
 Нижче подано документ `SRS.md`, згенерований командою
 `python srs_report.py srs.yaml SRS.md`.
 
-<!-- md@lab3: SRS.md -->
+@include md@lab3: SRS.md
 
 ## 4. Завдання 3. Автоматизоване рецензування вимог
 
@@ -69,19 +69,19 @@ title: Збір та аналіз вимог до інформаційної с�
 
 Нормалізація багаторядкового тексту під час завантаження:
 
-<!-- py: srs_model.py normalize_text -->
+@include py: srs_model.py normalize_text
 
 Рекурсивне виведення вимоги з підвимогами з відступом:
 
-<!-- py: srs_report.py _render_tree -->
+@include py: srs_report.py _render_tree
 
 Перевірка трасованості до батьківської вимоги (перевірка 7):
 
-<!-- py: validate.py check_parents -->
+@include py: validate.py check_parents
 
 Пошук схожих вимог модулем `difflib` після нормалізації регістру й пробілів (перевірка 8):
 
-<!-- py: validate.py check_similar -->
+@include py: validate.py check_similar
 
 ### 4.3 Власні перевірки
 
@@ -99,7 +99,7 @@ title: Збір та аналіз вимог до інформаційної с�
 
 Першу версію специфікації збережено у файлі `results/srs_draft.yaml`.
 
-<!-- txt: results/validate_before.txt -->
+@include txt: results/validate_before.txt
 
 ### 4.5 Виправлення дефектів
 
@@ -124,15 +124,15 @@ title: Збір та аналіз вимог до інформаційної с�
 
 Вимогу R8.1 додано пізніше, під час перевірки моделей у лабораторній роботі 3, тому специфікація містить 39 вимог.
 
-<!-- txt: results/validate_after.txt -->
+@include txt: results/validate_after.txt
 
 Результат на файлі `bad_srs.yaml` із навмисними дефектами (спрацьовує кожна з 13 перевірок):
 
-<!-- txt: results/validate_bad.txt -->
+@include txt: results/validate_bad.txt
 
 Результат запуску `pytest`:
 
-<!-- txt: results/pytest.txt -->
+@include txt: results/pytest.txt
 
 ## 5. Відповіді на контрольні питання
 
@@ -209,4 +209,4 @@ title: Збір та аналіз вимог до інформаційної с�
 
 ## Додаток А. Файл srs.yaml
 
-<!-- txt@lab3: srs.yaml yaml -->
+@include txt@lab3: srs.yaml yaml

@@ -15,13 +15,13 @@ title: Детальне проєктування класів із застос�
 
 ## 2. Завдання 1. Розподіл відповідальностей
 
-<!-- md: grasp_decisions.md -->
+@include md: grasp_decisions.md
 
 ### 2.1 Виправлені діаграми послідовності
 
 Оновлені таблиці пройшли перевірку правила Kung програмою `seq_gen.py` з ЛР 4:
 
-<!-- txt: results/seq_gen_v2.txt -->
+@include txt: results/seq_gen_v2.txt
 
 ![Діаграма послідовності UC7 після виправлення](diagrams/uc7_sale_v2.png)
 
@@ -31,15 +31,15 @@ title: Детальне проєктування класів із застос�
 
 Добір партії перенесено до `Pharmacy`, яка містить свої партії:
 
-<!-- py@lab6: ../pharmacy/domain/chain.py Pharmacy.pick_batch_for_sale -->
+@include py@lab6: ../pharmacy/domain/chain.py Pharmacy.pick_batch_for_sale
 
 Причину недійсності визначає сам рецепт:
 
-<!-- py@lab6: ../pharmacy/domain/prescription.py EPrescription.invalid_reason -->
+@include py@lab6: ../pharmacy/domain/prescription.py EPrescription.invalid_reason
 
 Контролер тепер лише координує кроки:
 
-<!-- py@lab6: ../pharmacy/controllers/prescription_sale_controller.py PrescriptionSaleController.sell -->
+@include py@lab6: ../pharmacy/controllers/prescription_sale_controller.py PrescriptionSaleController.sell
 
 ## 3. Завдання 2. Діаграма класів проєкту і контракти
 
@@ -49,19 +49,19 @@ title: Детальне проєктування класів із застос�
 
 Тест `test_dcd_matches_code` читає `dcd.puml` і перевіряє, що кожен метод діаграми існує в коді.
 
-<!-- md: dcd_trace.md -->
+@include md: dcd_trace.md
 
 ### 3.2 Контракти
 
-<!-- md: contracts.md -->
+@include md: contracts.md
 
 Перевірка контрактів реалізована функціями `require`, `ensure`, `invariant` і декоратором:
 
-<!-- py@lab6: ../pharmacy/foundation/contracts.py keeps_invariant -->
+@include py@lab6: ../pharmacy/foundation/contracts.py keeps_invariant
 
 Приклад застосування в методі партії:
 
-<!-- py@lab6: ../pharmacy/domain/batch.py Batch.block -->
+@include py@lab6: ../pharmacy/domain/batch.py Batch.block
 
 Клас `ContractError` успадковує `DomainError`, тому всі попередні тести, що очікували
 `DomainError`, працюють і далі.
@@ -70,26 +70,26 @@ title: Детальне проєктування класів із застос�
 
 Для кожної передумови й інваріанта є тест на дотримання і тест на порушення:
 
-<!-- py@lab6: ../tests/test_contracts.py test_block_precondition_violation_changes_nothing -->
+@include py@lab6: ../tests/test_contracts.py test_block_precondition_violation_changes_nothing
 
-<!-- py@lab6: ../tests/test_contracts.py test_keeps_invariant_restores_state_after_violation -->
+@include py@lab6: ../tests/test_contracts.py test_keeps_invariant_restores_state_after_violation
 
 Запуск усіх тестів пакета:
 
-<!-- txt: results/pytest_tests.txt -->
+@include txt: results/pytest_tests.txt
 
 ## 4. Завдання 3. Шаблон GoF і метрики
 
 ### 4.1 Шаблон Strategy
 
-<!-- md: strategy_spec.md -->
+@include md: strategy_spec.md
 
-<!-- py@lab6: ../pharmacy/domain/pricing.py ReimbursedPricing -->
+@include py@lab6: ../pharmacy/domain/pricing.py ReimbursedPricing
 
 Тест показує заміну поведінки: клієнтський код `checkout` однаковий для всіх стратегій, а новий
 клас `FixedPricing` працює без змін у `Sale`.
 
-<!-- py@lab6: ../tests/test_pricing.py test_policy_changes_amount_without_changing_client_code -->
+@include py@lab6: ../tests/test_pricing.py test_policy_changes_amount_without_changing_client_code
 
 ### 4.2 Програма metrics.py
 
@@ -105,15 +105,15 @@ title: Детальне проєктування класів із застос�
 
 Метрики до змін:
 
-<!-- txt: results/metrics_before.txt -->
+@include txt: results/metrics_before.txt
 
 Метрики після змін:
 
-<!-- txt: results/metrics_after.txt -->
+@include txt: results/metrics_after.txt
 
 ### 4.3 Порівняння
 
-<!-- md: results/metrics_compare.md -->
+@include md: results/metrics_compare.md
 
 **Висновки щодо метрик.**
 

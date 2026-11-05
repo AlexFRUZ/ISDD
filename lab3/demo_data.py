@@ -1,4 +1,3 @@
-"""Демонстраційні дані прототипу UC7 (зберігаються в пам'яті)."""
 from __future__ import annotations
 
 from dataclasses import dataclass

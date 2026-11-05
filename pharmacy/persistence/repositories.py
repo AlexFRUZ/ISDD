@@ -1,11 +1,3 @@
-"""Інтерфейси репозиторіїв (ЛР 7, завдання 2).
-
-Контролери залежать лише від цих протоколів. Реалізації лежать у memory.py і sqlite.py.
-Репозиторій є для кожного кореневого об'єкта, який використовують контролери: лікар
-зберігається разом із рецептом, позиції разом із продажем, а мережа разом з аптеками.
-Постачальник і поставка мають таблиці в схемі, але варіанти використання UC10-UC13 ще не
-реалізовано, тому репозиторіїв для них немає.
-"""
 from __future__ import annotations
 
 from contextlib import AbstractContextManager
@@ -19,7 +11,7 @@ from pharmacy.domain import (
 
 Entity = TypeVar("Entity")
 Key = TypeVar("Key")
-BatchKey = tuple[str, str, str]  # номер аптеки, торгова назва, серія
+BatchKey = tuple[str, str, str]
 
 
 class Repository(Protocol[Entity, Key]):
@@ -63,8 +55,6 @@ class SaleRepository(Repository[Sale, str], Protocol):
 
 
 class UnitOfWork(Protocol):
-    """Набір репозиторіїв, які змінюються в одній транзакції."""
-
     pharmacies: PharmacyRepository
     pharmacists: PharmacistRepository
     drugs: DrugRepository

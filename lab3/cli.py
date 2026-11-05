@@ -1,10 +1,3 @@
-"""Консольний інтерфейс прототипу UC7.
-
-Приклади:
-  python cli.py sell --recipe E-100 --qty 1
-  python cli.py sell --recipe E-999 --qty 1
-  python cli.py sell --recipe E-100 --qty 1 --registry-down
-"""
 from __future__ import annotations
 
 import argparse

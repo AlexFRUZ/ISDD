@@ -72,7 +72,6 @@ Expert і Creator. Стовпець «Було» показує, хто вико
 
 ```python
 def pick_batch_for_sale(self, inn: str, quantity: int, today: date) -> Batch | None:
-    """Експерт добору партії: аптека знає свої партії. Правило FEFO."""
     suitable = [b for b in self.batches if b.drug.inn == inn and b.can_supply(quantity, today)]
     return min(suitable, key=lambda b: b.expiry_date, default=None)
 ```
@@ -81,7 +80,6 @@ def pick_batch_for_sale(self, inn: str, quantity: int, today: date) -> Batch | N
 
 ```python
 def invalid_reason(self, today: date) -> str | None:
-    """Причина недійсності або None для чинного рецепта. Експерт: рецепт знає свій стан."""
     if self.state is not PrescriptionState.ACTIVE:
         return f"стан «{self.state.value}»"
     if today - self.issued_on > timedelta(days=PRESCRIPTION_VALID_DAYS):
@@ -94,7 +92,6 @@ def invalid_reason(self, today: date) -> str | None:
 ```python
 def sell(self, pharmacist_number: str, recipe_number: str, quantity: int,
          payment: str = "картка") -> SaleResult:
-    """Контракт: lab6/contracts.md, метод 1."""
     require(quantity >= 1, "Кількість має бути додатною")
     now = self.clock()
     today = now.date()
@@ -258,11 +255,6 @@ def sell(self, pharmacist_number: str, recipe_number: str, quantity: int,
 
 ```python
 def keeps_invariant(method: Method) -> Method:
-    """Перевіряє інваріант після методу, а в разі порушення повертає попередній стан.
-
-    Так об'єкт не лишається в невалідному стані, навіть якщо метод змінив поля
-    й лише потім виявилося порушення контракту.
-    """
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         snapshot = {k: list(v) if isinstance(v, list) else v for k, v in vars(self).items()}
@@ -274,7 +266,7 @@ def keeps_invariant(method: Method) -> Method:
             vars(self).update(snapshot)
             raise
         return result
-    return wrapper  # type: ignore[return-value]
+    return wrapper
 ```
 
 Приклад застосування в методі партії:
@@ -282,7 +274,6 @@ def keeps_invariant(method: Method) -> Method:
 ```python
 @keeps_invariant
 def block(self, quantity: int) -> None:
-    """Блокує кількість під резервування, не змінюючи фізичний залишок."""
     require(quantity > 0, "Кількість має бути додатною")
     require(quantity <= self.available, f"Партія {self.series}: доступно лише {self.available} уп.")
     available_before = self.available
@@ -349,8 +340,6 @@ State уже застосовано в табличному вигляді дл�
 ```python
 @dataclass(frozen=True)
 class ReimbursedPricing:
-    """Частину вартості за рецептом відшкодовує програма реімбурсації."""
-
     share: Decimal
 
     def amount_due(self, subtotal: Decimal) -> Decimal:

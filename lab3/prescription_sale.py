@@ -1,8 +1,3 @@
-"""Прототип UC7 «Продати за е-рецептом» на доменних класах ЛР 2 (ЛР 3, завдання 3).
-
-Кожен альтернативний потік опису UC7 є окремою гілкою коду, яка кидає SaleRefused
-з номером потоку та інформативним повідомленням.
-"""
 from __future__ import annotations
 
 import sys
@@ -12,27 +7,23 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lab2"))
 
-from domain import (  # noqa: E402
+from domain import (
     Batch, EPrescription, PaymentMethod, Pharmacist, Pharmacy, PharmacyChain,
     PrescriptionState, Sale,
 )
 
 
 class SaleRefused(Exception):
-    """Альтернативний потік UC7: продаж не оформлено."""
-
     def __init__(self, flow: str, message: str) -> None:
         super().__init__(message)
         self.flow = flow
 
 
 class RegistryUnavailable(Exception):
-    """Реєстр е-рецептів не відповідає."""
+    pass
 
 
 class InMemoryRegistry:
-    """Заглушка реєстру е-рецептів для прототипу."""
-
     def __init__(self, prescriptions: list[EPrescription]) -> None:
         self._prescriptions = {p.number: p for p in prescriptions}
         self.online = True
@@ -47,8 +38,6 @@ class InMemoryRegistry:
 
 
 class PrescriptionSaleService:
-    """Сервіс варіанта використання UC7."""
-
     def __init__(self, chain: PharmacyChain, registry: InMemoryRegistry, pharmacist: Pharmacist) -> None:
         self.chain = chain
         self.registry = registry
@@ -58,11 +47,11 @@ class PrescriptionSaleService:
     def sell(self, recipe_number: str, quantity: int, now: datetime,
              payment: PaymentMethod = PaymentMethod.CARD) -> Sale:
         today = now.date()
-        recipe = self._check_recipe(recipe_number, today)              # кроки 3, 3a, 3b
-        self._check_quantity(recipe, quantity)                         # кроки 4, 4a
-        batch = self._pick_batch(recipe, quantity, today)              # кроки 5, 5a
-        self._redeem(recipe, quantity, today)                          # кроки 6, 6a
-        return self._create_sale(recipe, batch, quantity, now, payment)  # крок 7
+        recipe = self._check_recipe(recipe_number, today)
+        self._check_quantity(recipe, quantity)
+        batch = self._pick_batch(recipe, quantity, today)
+        self._redeem(recipe, quantity, today)
+        return self._create_sale(recipe, batch, quantity, now, payment)
 
     def _check_recipe(self, number: str, today) -> EPrescription:
         recipe = self.registry.find(number)
@@ -86,7 +75,7 @@ class PrescriptionSaleService:
     def _pick_batch(self, recipe: EPrescription, quantity: int, today) -> Batch:
         here = self._suitable_batches(self.pharmacist.pharmacy, recipe.inn, quantity, today)
         if here:
-            return min(here, key=lambda b: b.expiry_date)  # правило FEFO
+            return min(here, key=lambda b: b.expiry_date)
         others = [p.number for p in self.chain.pharmacies if p is not self.pharmacist.pharmacy
                   and self._suitable_batches(p, recipe.inn, quantity, today)]
         hint = f" Препарат є в аптеках: {', '.join(others)}." if others else ""

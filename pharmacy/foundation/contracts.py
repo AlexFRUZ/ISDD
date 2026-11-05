@@ -1,4 +1,3 @@
-"""Перевірка контрактів: передумови, постумови й інваріанти (ЛР 6, завдання 2)."""
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -11,13 +10,11 @@ Method = TypeVar("Method", bound=Callable[..., Any])
 
 
 def require(condition: bool, message: str) -> None:
-    """Передумова: перевіряється на початку методу, до будь-яких змін."""
     if not condition:
         raise ContractError(message)
 
 
 def ensure(condition: bool, message: str) -> None:
-    """Постумова: перевіряється перед поверненням результату."""
     if not condition:
         raise ContractError(f"Постумову порушено: {message}")
 
@@ -28,11 +25,6 @@ def invariant(condition: bool, message: str) -> None:
 
 
 def keeps_invariant(method: Method) -> Method:
-    """Перевіряє інваріант після методу, а в разі порушення повертає попередній стан.
-
-    Так об'єкт не лишається в невалідному стані, навіть якщо метод змінив поля
-    й лише потім виявилося порушення контракту.
-    """
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         snapshot = {k: list(v) if isinstance(v, list) else v for k, v in vars(self).items()}
@@ -44,4 +36,4 @@ def keeps_invariant(method: Method) -> Method:
             vars(self).update(snapshot)
             raise
         return result
-    return wrapper  # type: ignore[return-value]
+    return wrapper

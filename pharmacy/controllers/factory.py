@@ -1,4 +1,3 @@
-"""Збірка застосунку. Завдяки цьому модулю рівень подання не залежить від рівня збереження."""
 from __future__ import annotations
 
 from dataclasses import dataclass

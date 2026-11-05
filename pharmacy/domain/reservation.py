@@ -1,4 +1,3 @@
-"""Резервування з табличною машиною станів (таблицю перевіряє lab4/fsm_check.py)."""
 from __future__ import annotations
 
 import csv
@@ -71,11 +70,6 @@ class Reservation:
 
     @classmethod
     def restore(cls, **fields) -> Reservation:
-        """Відновлює збережений об'єкт без умов створення.
-
-        Умови створення діють лише в момент резервування. Давнє резервування не стає
-        некоректним через те, що партія з часом втратила залишковий строк придатності.
-        """
         reservation = cls.__new__(cls)
         reservation.__dict__.update(fields)
         reservation.customer.reservations.append(reservation)
@@ -99,7 +93,6 @@ class Reservation:
 
     @keeps_invariant
     def fire(self, event: str, moment: datetime | None = None) -> None:
-        """Обробляє подію за таблицею переходів; недопустима подія кидає виняток."""
         moment = moment or self.created_at
         transitions = TRANSITIONS.get((self.state.value, event))
         if not transitions:
@@ -175,7 +168,6 @@ class Transition:
 
 
 def load_transitions(path: Path = TRANSITIONS_FILE) -> dict[tuple[str, str], list[Transition]]:
-    """Завантажує таблицю переходів. Невідома умова чи дія є помилкою моделі."""
     table: dict[tuple[str, str], list[Transition]] = defaultdict(list)
     with open(path, encoding="utf-8", newline="") as stream:
         for row in csv.DictReader(stream, delimiter=";"):

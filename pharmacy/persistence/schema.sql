@@ -1,8 +1,3 @@
--- Реляційна схема ІС «Мережа аптек» (ЛР 7, завдання 1).
--- Правила відображення класів наведено в lab7/mapping.md.
--- Гроші зберігаються в копійках, частка реімбурсації в сотих частках відсотка:
--- цілі числа, на відміну від REAL, не мають помилок округлення.
-
 CREATE TABLE pharmacy_chain (
     chain_id INTEGER PRIMARY KEY,
     name     TEXT NOT NULL,
@@ -33,7 +28,6 @@ CREATE TABLE drug (
     manufacturer TEXT NOT NULL
 );
 
--- Успадкування, правило 8a: первинний ключ підкласу збігається з ключем суперкласу.
 CREATE TABLE prescription_drug (
     drug_id       INTEGER PRIMARY KEY REFERENCES drug (drug_id) ON DELETE CASCADE,
     control_group TEXT NOT NULL
@@ -44,7 +38,6 @@ CREATE TABLE otc_drug (
     check_limit INTEGER NOT NULL CHECK (check_limit >= 1)
 );
 
--- Строк придатності залежить від серії препарату, а не від партії в конкретній аптеці.
 CREATE TABLE drug_series (
     drug_id     INTEGER NOT NULL REFERENCES drug (drug_id),
     series      TEXT NOT NULL,
@@ -125,7 +118,6 @@ CREATE TABLE sale (
     prescription_number TEXT UNIQUE REFERENCES prescription (number)
 );
 
--- Асоціативний клас, правило 6: нова таблиця зі складеним ключем.
 CREATE TABLE sale_line (
     sale_number    TEXT NOT NULL REFERENCES sale (number) ON DELETE CASCADE,
     batch_id       INTEGER NOT NULL REFERENCES batch (batch_id),
@@ -134,7 +126,6 @@ CREATE TABLE sale_line (
     PRIMARY KEY (sale_number, batch_id)
 );
 
--- Лічильники номерів чеків і резервувань.
 CREATE TABLE sequence (
     kind  TEXT PRIMARY KEY,
     value INTEGER NOT NULL CHECK (value >= 0)

@@ -1,4 +1,3 @@
-"""Тести машини станів класу Reservation: кожен рядок transitions.csv (ЛР 4)."""
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
@@ -17,7 +16,6 @@ STOCK = 5
 
 
 def make_reservation(state: str, stock: int = STOCK) -> d.Reservation:
-    """Резервування в заданому стані з узгодженим залишком партії."""
     pharmacy = d.Pharmacy("А-01", "вул. Подільська, 1", "Хмельницький", "+380382000001", "8:00-20:00")
     drug = d.OtcDrug("Парацетамол", "Paracetamol", "таблетки", "500 мг", "Дарниця")
     batch = d.Batch("S-1", date(2027, 11, 4), Decimal("1"), Decimal("2"), stock, drug, pharmacy)
@@ -65,7 +63,7 @@ def test_invalid_state_event_pairs(state, event):
     reservation = make_reservation(state)
     with pytest.raises(d.TransitionError, match="недопустима"):
         reservation.fire(event, BEFORE_EXPIRY)
-    assert reservation.state.value == state  # недопустима подія не змінює стан
+    assert reservation.state.value == state
 
 
 def test_issue_after_expiry_is_refused_by_guard():

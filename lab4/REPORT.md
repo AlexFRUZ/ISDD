@@ -122,7 +122,6 @@ no;subject;action;data;target;kind
 
 ```python
 def check_kung_rule(rows: list[Row]) -> list[str]:
-    """Суб'єкт рядка має бути об'єктом дії попереднього рядка або суб'єктом одного з попередніх."""
     violations: list[str] = []
     messages = [r for r in rows if r.is_message]
     seen_subjects: set[str] = set()
@@ -283,7 +282,6 @@ state;event;guard;action;next
 
 ```python
 def unreachable_states(self) -> list[str]:
-    """Обхід графа в ширину від початкового стану."""
     graph: dict[str, set[str]] = defaultdict(set)
     for transition in self.real:
         graph[transition.state].add(transition.next)
@@ -332,7 +330,6 @@ def unreachable_states(self) -> list[str]:
 
 ```python
 def fire(self, event: str, moment: datetime | None = None) -> None:
-    """Обробляє подію за таблицею переходів; недопустима подія кидає виняток."""
     moment = moment or self.created_at
     transitions = TRANSITIONS.get((self.state.value, event))
     if not transitions:
